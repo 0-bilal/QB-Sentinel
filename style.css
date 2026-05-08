@@ -185,3 +185,106 @@ body {
     cursor: not-allowed;
     opacity: 0.7;
 }
+
+/* Developer Footer Styling */
+.developer-footer {
+    margin-top: 40px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 40px;
+}
+
+.dev-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.dev-card:hover {
+    transform: translateY(-5px);
+}
+
+.dev-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+}
+
+.dev-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: var(--primary);
+}
+
+.project-name {
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.dev-text {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.brand-text {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+.client-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.version-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 50px;
+    padding: 4px 12px;
+    border: 1px solid #eee;
+}
+
+.version-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #999;
+    margin-left: 6px;
+    font-weight: bold;
+}
+
+.version-number {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.dev-icon, .client-icon {
+    width: 18px;
+    height: 18px;
+}
