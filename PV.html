@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>قائمة فحص جودة الفاكهة | FQC</title>
-    <link rel="stylesheet" href="FIL/FIL-style.css">
+    <title>سند صرف نقدية | PV</title>
+    <link rel="stylesheet" href="PV/PV-style.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/x-icon" href="ico/logo.ico">
@@ -26,26 +26,24 @@
         <div class="header-overlay"></div>
         <div class="logo-area">
             <img src="ico/logo.ico" alt="Logo" class="logo">
-            <h1>قائمة فحص جودة الفاكهة</h1>
-            <p class="en-sub-header">FRUIT QUALITY CHECKLIST
-            </p>
+            <h1>سند صرف نقدية</h1>
+            <p class="en-sub-header">CASH PAYMENT VOUCHER</p>
         </div>
     </header>
 
-    <form id="cleaningReportForm" novalidate>
+    <form id="paymentVoucherForm" novalidate>
         <div class="card info-card">
-            <p class="description">سجل رقمي لتوثيق عمليات الجودة للفاكهة، تهدف إلى ضمان أعلى مستويات السلامة الغذائية والالتزام بالمعايير التشغيلية</p>
-            <p class="description en-text"></p>
+            <p class="description">أداة رقابية لتوثيق وضبط كافة الحركات المالية والمصروفات النقدية،</p>
             <div class="required-indicator"></div>
         </div>
 
-                    <div class="back-nav">
-    <a href="index.html" class="back-btn">
-        <i data-lucide="arrow-right"></i>
-        <span>العودة للقائمة الرئيسية</span>
-        <small>Return</small>
-    </a>
-   </div>
+        <div class="back-nav">
+            <a href="index.html" class="back-btn">
+                <i data-lucide="arrow-right"></i>
+                <span>العودة للقائمة الرئيسية</span>
+                <small>Return</small>
+            </a>
+        </div>
 
         <div class="card" id="branchCard">
             <label class="label-heading">اختيار الفرع / Select Branch <span class="required">*</span></label>
@@ -78,58 +76,39 @@
             </div>
         </div>
 
-<form id="fruitReportForm" novalidate> 
-    <div class="card" id="fruitCheckCard">
-        <label class="label-heading">قائمة فحص الفواكه / Fruit Checklist <span class="required">*</span></label>
-        <div id="fruitGrid" class="fruit-management-grid"></div>
-    </div>
-
-    </form>
-
-        <form id="fruitReportForm" novalidate> 
-    <div class="card hidden" id="photoCard">
-        <label class="label-heading">التوثيق بالصورة للفواكه التالفة / Photo Evidence <span class="required">*</span></label>
-        <div class="camera-wrapper">
-            <label for="cameraInput" class="camera-trigger" id="dropArea">
-                <div class="icon-circle">
-                    <i data-lucide="camera"></i>
-                </div>
-                <p>التقط صورة للفواكه التالفة</p>
-                <small>Take a Photo of Damaged Fruits</small>
-                <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
-            </label>
-            
-            <div id="imagePreviewContainer" class="hidden">
-                <div class="preview-frame">
-                    <img id="imagePreview" src="" alt="Preview">
-                    <button type="button" id="removeImage" class="remove-overlay">
-                        <i data-lucide="x-circle"></i> حذف وإعادة التصوير
-                    </button>
-                </div>
+        <div class="card" id="reasonCard">
+            <label class="label-heading">سبب الصرف / Reason for Payment <span class="required">*</span></label>
+            <div class="modern-input">
+                <i data-lucide="file-text"></i>
+                <input type="text" id="paymentReason" placeholder="Purpose of payment" required>
             </div>
         </div>
-    </div>
 
-    <div class="actions">
-        <button type="submit" class="submit-btn" id="submitBtn">
-            <span class="btn-content">
-                <i data-lucide="check-circle"></i>
-                إرسال التقرير / Submit
-            </span>
-        </button>
-    </div>
-</form>
+        <div class="card" id="amountCard">
+            <label class="label-heading">المبلغ المصروف / Amount (SAR) <span class="required">*</span></label>
+            <div class="modern-input">
+                <i data-lucide="banknote"></i>
+                <input type="number" id="amount" step="0.01" placeholder="0.00" required>
+            </div>
+        </div>
 
-<div id="customModal" class="modal-overlay hidden">
-    <div class="modal-content">
-        <div id="modalIcon" class="modal-icon"></div>
-        <h3 id="modalTitle"></h3>
-        <p id="modalMessage"></p>
-        <div id="modalLoader" class="modal-loader hidden"></div>
-        <button id="modalClose" class="modal-btn">موافق / OK</button>
-    </div>
+        <div class="card" id="beneficiaryCard">
+            <label class="label-heading">رقم هاتف المستفيد من الصرف / Beneficiary Phone <small>(Optional)</small></label>
+            <div class="modern-input">
+                <i data-lucide="phone"></i> <input type="tel" id="beneficiaryPhone" placeholder="05xxxxxxxx رقم ">
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="btn-content">
+                    <i data-lucide="check-circle"></i>
+                    إرسال السند / Submit
+                </span>
+            </button>
+        </div>
+    </form>
 </div>
-
 
 <footer class="developer-footer">
     <div class="dev-card">
@@ -153,9 +132,7 @@
         </div>
     </div>
 </footer>
-
-<script src="FIL/FIL-script.js"></script>
-<script src="FIL/FIL-bot.js"></script>
+<script src="PV/PV-script.js"></script>
 <script src="js/versions.js"></script>
 <script>lucide.createIcons();</script>
 </body>

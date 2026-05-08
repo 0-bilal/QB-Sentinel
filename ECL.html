@@ -37,7 +37,7 @@
 
     <form id="cleaningReportForm" novalidate>
         <div class="card info-card">
-            <p class="description">"يُعتبر سجل QB-Sentinel أداة استراتيجية تهدف إلى تعزيز معايير الجودة والشفافية في العمليات التشغيلية لشركة عصير تايم."</p>
+            <p class="description">أداة رقابية لتوثيق عمليات النظافة الدورية للمعدات، تهدف إلى ضمان أعلى مستويات السلامة الغذائية والالتزام بالمعايير التشغيلية</p>
             <p class="description en-text"></p>
             <div class="required-indicator"></div>
         </div>
@@ -90,109 +90,108 @@
         </div>
 
         <div class="card" id="equipmentCard">
-            <label class="label-heading">الجهاز التي تم تنظيفه / Equipment <span class="required">*</span></label>
-            <div class="check-group">
-
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Ice cream machine #1" data-id="EQ-101">
-                    <div class="check-content">
-                        <span>ماكينة آيس كريم #1</span>
-                        <small>Ice cream machine #1</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Ice cream machine #2" data-id="EQ-102">
-                    <div class="check-content">
-                        <span>ماكينة آيس كريم #2</span>
-                        <small>Ice cream machine #2</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-103">
-                    <div class="check-content">
-                        <span>ماكينة الميني بان كيك</span>
-                        <small>Mini pancake machine</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-104">
-                    <div class="check-content">
-                        <span>ماكينة الوافل</span>
-                        <small>waffle maker</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-105">
-                    <div class="check-content">
-                        <span>ماكينة البان كيك</span>
-                        <small>pancake machine</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-106">
-                    <div class="check-content">
-                        <span>ماكينة عصر  البرتقال</span>
-                        <small>Orange juice machine</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-107">
-                    <div class="check-content">
-                        <span>ماكينة عصر الشمندر</span>
-                        <small>Beetroot juicer</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-108">
-                    <div class="check-content">
-                        <span>ماكينة تسخين الصوصات</span>
-                        <small>Sauce warmer</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-109">
-                    <div class="check-content">
-                        <span>مكيف صالة المحل</span>
-                        <small>Shop hall air conditioner</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-110">
-                    <div class="check-content">
-                        <span>مكيف المطبخ</span>
-                        <small>kitchen air conditioner</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-111">
-                    <div class="check-content">
-                        <span>علب صوص : بستاشيو ، نوتيلا ، لوتس</span>
-                        <small>Containers : pistachio, nutella, lotus</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-112">
-                    <div class="check-content">
-                        <span>علب صوص :  شوكولاتة داكنة ، شوكولاتة بيضاء</span>
-                        <small>Containers : dark chocolate, white chocolate</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-113">
-                    <div class="check-content">
-                        <span>علب صوص : كيندر ، فيريرو روشيه  ، أوريو</span>
-                        <small>Containers : Kinder, Ferrero Rocher, Oreo</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-114">
-                    <div class="check-content">
-                        <span>علب صوص : السيروب</span>
-                        <small>Containers : Syrup</small>
-                    </div>
-                </label>
+    <label class="label-heading">الجهاز التي تم تنظيفه / Equipment <span class="required">*</span></label>
+    <div class="check-group">
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Ice cream machine #1" data-id="EQ-101" required>
+            <div class="check-content">
+                <span>ماكينة آيس كريم #1</span>
+                <small>Ice cream machine #1</small>
             </div>
-        </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Ice cream machine #2" data-id="EQ-102">
+            <div class="check-content">
+                <span>ماكينة آيس كريم #2</span>
+                <small>Ice cream machine #2</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Mini pancake machine" data-id="EQ-103">
+            <div class="check-content">
+                <span>ماكينة الميني بان كيك</span>
+                <small>Mini pancake machine</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="waffle maker" data-id="EQ-104">
+            <div class="check-content">
+                <span>ماكينة الوافل</span>
+                <small>waffle maker</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="pancake machine" data-id="EQ-105">
+            <div class="check-content">
+                <span>ماكينة البان كيك</span>
+                <small>pancake machine</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Orange juice machine" data-id="EQ-106">
+            <div class="check-content">
+                <span>ماكينة عصر البرتقال</span>
+                <small>Orange juice machine</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Beetroot juicer" data-id="EQ-107">
+            <div class="check-content">
+                <span>ماكينة عصر الشمندر</span>
+                <small>Beetroot juicer</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Sauce warmer" data-id="EQ-108">
+            <div class="check-content">
+                <span>ماكينة تسخين الصوصات</span>
+                <small>Sauce warmer</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Shop hall air conditioner" data-id="EQ-109">
+            <div class="check-content">
+                <span>مكيف صالة المحل</span>
+                <small>Shop hall air conditioner</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="kitchen air conditioner" data-id="EQ-110">
+            <div class="check-content">
+                <span>مكيف المطبخ</span>
+                <small>kitchen air conditioner</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Containers : pistachio, nutella, lotus" data-id="EQ-111">
+            <div class="check-content">
+                <span>علب صوص : بستاشيو ، نوتيلا ، لوتس</span>
+                <small>Containers : pistachio, nutella, lotus</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Containers : dark chocolate, white chocolate" data-id="EQ-112">
+            <div class="check-content">
+                <span>علب صوص : شوكولاتة داكنة ، شوكولاتة بيضاء</span>
+                <small>Containers : dark chocolate, white chocolate</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Containers : Kinder, Ferrero Rocher, Oreo" data-id="EQ-113">
+            <div class="check-content">
+                <span>علب صوص : كيندر ، فيريرو روشيه ، أوريو</span>
+                <small>Containers : Kinder, Ferrero Rocher, Oreo</small>
+            </div>
+        </label>
+        <label class="check-tile">
+            <input type="radio" name="equipment" value="Containers : Syrup" data-id="EQ-114">
+            <div class="check-content">
+                <span>علب صوص : السيروب</span>
+                <small>Containers : Syrup</small>
+            </div>
+        </label>
+    </div>
+</div>
 
         <div class="card" id="photoCard">
             <label class="label-heading">التوثيق بالصورة / Photo Evidence <span class="required">*</span></label>
@@ -245,13 +244,14 @@
             </div>
             <div class="version-badge">
                 <span class="version-label">Version</span>
-                <span class="version-number">v1.2.6</span>
+                <span class="version-number"></span>
             </div>
         </div>
     </div>
 </footer>
 
 <script src="ECL/ECL-script.js"></script>
+<script src="js/versions.js"></script>
 <script>lucide.createIcons();</script>
 </body>
 </html>
