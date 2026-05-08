@@ -18,7 +18,20 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'f5', ar: 'برتقال', en: 'Orange' },
         { id: 'f6', ar: 'كيوي', en: 'Kiwi' },
         { id: 'f7', ar: 'أناناس', en: 'Pineapple' },
-        { id: 'f8', ar: 'رمان', en: 'Pomegranate' }
+        { id: 'f8', ar: 'رمان', en: 'Pomegranate' },
+        { id: 'f9', ar: 'الشمندر', en: 'Beetroot' },
+        { id: 'f10', ar: 'جزر', en: 'Carrot' },
+        { id: 'f11', ar: 'ليمون', en: 'Lemon' },
+        { id: 'f12', ar: 'بطيخ', en: 'Watermelon' },
+        { id: 'f13', ar: 'تفاح أخضر ', en: 'Green Apple' },
+        { id: 'f14', ar: 'تفاح أحمر', en: 'Red Apple' },
+        { id: 'f15', ar: 'شمام', en: 'Sweet Melo' },
+        { id: 'f16', ar: 'توت أزرق', en: 'Blueberry' },
+        { id: 'f17', ar: 'بلاك بيري', en: 'Blackberry' },
+        { id: 'f18', ar: 'توت احمر', en: 'Raspberry' },
+        { id: 'f19', ar: 'خوخ', en: 'Peach' },
+        { id: 'f20', ar: 'عنب', en: 'Geape' },
+        { id: 'f21', ar: 'نعناع', en: 'Mint' }
     ];
 
     const fruitGrid = document.getElementById('fruitGrid');
