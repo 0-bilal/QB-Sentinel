@@ -51,23 +51,22 @@ document.addEventListener('DOMContentLoaded', () => {
     //    يمنع فتح نافذة الاختيار مرتين على الكمبيوتر
     // ===================================================
     function recreateCameraInput() {
-    const oldInput = document.querySelector('.dynamic-camera-input');
-    if (oldInput) oldInput.remove();
+        const oldInput = document.getElementById('cameraInput');
+        if (oldInput) oldInput.remove();
 
-    const newInput = document.createElement('input');
-    newInput.type = 'file';
-    // ID عشوائي تماماً لإرباك ذاكرة المتصفح
-    newInput.id = 'cam_' + Math.floor(Math.random() * 1000000);
-    // كلاس ثابت ليتمكن الزر من العثور عليه
-    newInput.className = 'dynamic-camera-input'; 
-    newInput.accept = 'image/*';
-    newInput.style.display = 'none';
+        const newInput = document.createElement('input');
+        newInput.type = 'file';
+        newInput.id = 'cameraInput';
+        newInput.accept = 'image/*';
+        // ❌ بدون capture نهائياً
+        newInput.style.display = 'none';
 
-    document.body.appendChild(newInput);
-    newInput.addEventListener('change', handleImageChange);
+        // في body وليس داخل label
+        document.body.appendChild(newInput);
+        newInput.addEventListener('change', handleImageChange);
 
-    return newInput;
-}
+        return newInput;
+    }
 
     // فتح نافذة الاختيار عند الضغط على منطقة الرفع
     els.drop.addEventListener('click', (e) => {
