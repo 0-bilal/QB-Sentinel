@@ -51,13 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
     //    يمنع فتح نافذة الاختيار مرتين على الكمبيوتر
     // ===================================================
     function recreateCameraInput() {
-    const oldInput = document.getElementById('cameraInput');
+    const oldInput = document.querySelector('.dynamic-camera-input');
     if (oldInput) oldInput.remove();
 
     const newInput = document.createElement('input');
     newInput.type = 'file';
-    // استخدام رقم عشوائي يجعل المتصفح يظن أنه حقل جديد تماماً
-    newInput.id = 'cameraInput_' + Math.random().toString(36).substr(2, 9); 
+    // ID عشوائي تماماً لإرباك ذاكرة المتصفح
+    newInput.id = 'cam_' + Math.floor(Math.random() * 1000000);
+    // كلاس ثابت ليتمكن الزر من العثور عليه
+    newInput.className = 'dynamic-camera-input'; 
     newInput.accept = 'image/*';
     newInput.style.display = 'none';
 
