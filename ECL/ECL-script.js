@@ -42,21 +42,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let compressedImageBase64 = null;
 
     // ===================================================
-    // كشف نوع الجهاز
-    // ===================================================
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    // ===================================================
-    // إعادة إنشاء input الكاميرا
+    // إنشاء input الكاميرا
     //
-    // الإصلاح الرئيسي:
-    // 1- نضع الـ input خارج الـ label تماماً (في body)
-    //    حتى لا يُطلق الـ label حدث click تلقائياً عليه
-    //    → هذا يحل مشكلة فتح النافذة مرتين على الكمبيوتر
+    // ✅ لا نستخدم capture="environment" نهائياً
+    //    السبب: capture يجبر كروم على فتح الكاميرا مباشرة
+    //    ويحجز مساحة تخزين مؤقتة → يظهر خطأ "مساحة منخفضة"
     //
-    // 2- على الجوال: نضيف capture="environment" فقط
-    //    على الأجهزة المحمولة لتجنب مشكلة مساحة كروم
-    //    على الكمبيوتر: بدون capture لفتح مربع حوار الملفات العادي
+    // ✅ بدون capture، كروم يفتح قائمة اختيار:
+    //    "التقاط صورة" أو "اختيار من المعرض"
+    //    وفي كلتا الحالتين لا يحجز مساحة مسبقة
+    //
+    // ✅ الـ input خارج الـ label في body
+    //    لمنع فتح النافذة مرتين على الكمبيوتر
     // ===================================================
     function recreateCameraInput() {
         const oldInput = document.getElementById('cameraInput');
@@ -66,26 +63,17 @@ document.addEventListener('DOMContentLoaded', () => {
         newInput.type = 'file';
         newInput.id = 'cameraInput';
         newInput.accept = 'image/*';
+        // ❌ بدون capture نهائياً - هذا هو الحل الجذري
         newInput.style.display = 'none';
 
-        // capture فقط على الجوال لتجنب مشكلة مساحة كروم
-        if (isMobile) {
-            newInput.setAttribute('capture', 'environment');
-        }
-
-        // نضعه في body وليس داخل label
         document.body.appendChild(newInput);
-
         newInput.addEventListener('change', handleImageChange);
         return newInput;
     }
 
-    // ===================================================
-    // فتح نافذة اختيار الصورة عند الضغط على dropArea
-    // نفتح الـ input يدوياً بدلاً من الاعتماد على label
-    // ===================================================
+    // فتح نافذة الاختيار عند الضغط على منطقة الرفع
     els.drop.addEventListener('click', (e) => {
-        e.preventDefault(); // منع الـ label من إرسال click مرة ثانية
+        e.preventDefault();
         const input = document.getElementById('cameraInput');
         if (input) input.click();
     });
