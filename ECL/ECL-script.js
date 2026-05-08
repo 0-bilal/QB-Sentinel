@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ⚠️ رابط النشر الخاص بك
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWzE9xiYd3dQCLsC_nkyq-TMSFY7k-JgZf9ptgvi7NIwlgu-CIcwEVX-pmuzbik8U7bw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyS1LaTdS9ejR7vPOP-pNsOukEJiyUIA-WjS6sZZQydYUKdz1aYxINRfHKdsoWKYTTO5A/exec';
 
     const employeeDatabase = {
-        "1000": "بلال الخواجة",
+        "1000": "بلال",
         "1101": "رمان",
         "1311": "محمد",
         "1551": "شاهين",
