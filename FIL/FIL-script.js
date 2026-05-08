@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'f10', ar: 'جزر', en: 'Carrot' },
         { id: 'f11', ar: 'ليمون', en: 'Lemon' },
         { id: 'f12', ar: 'بطيخ', en: 'Watermelon' },
-        { id: 'f13', ar: 'تفاح أخضر ', en: 'Green Apple' },
+        { id: 'f13', ar: 'تفاح أخضر', en: 'Green Apple' },
         { id: 'f14', ar: 'تفاح أحمر', en: 'Red Apple' },
         { id: 'f15', ar: 'شمام', en: 'Sweet Melo' },
         { id: 'f16', ar: 'توت أزرق', en: 'Blueberry' },
@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const els = {
         form: document.getElementById('fruitReportForm'),
+        submitBtn: document.getElementById('submitBtn'),
         photoCard: document.getElementById('photoCard'),
-        cameraInput: document.getElementById('cameraInput'),
         preview: document.getElementById('imagePreview'),
         container: document.getElementById('imagePreviewContainer'),
         dropArea: document.getElementById('dropArea'),
@@ -53,6 +53,75 @@ document.addEventListener('DOMContentLoaded', () => {
         modalClose: document.getElementById('modalClose')
     };
 
+    let compressedImageBase64 = "";
+
+    // ===================================================
+    // إعادة إنشاء input الكاميرا من الصفر (نفس حل ECL)
+    // ===================================================
+    function recreateCameraInput() {
+        const oldInput = document.getElementById('cameraInput');
+        if (oldInput) oldInput.remove();
+
+        const newInput = document.createElement('input');
+        newInput.type = 'file';
+        newInput.id = 'cameraInput';
+        newInput.accept = 'image/*';
+        newInput.setAttribute('capture', 'environment');
+        newInput.hidden = true;
+
+        els.dropArea.appendChild(newInput);
+        newInput.addEventListener('change', handleImageChange);
+
+        return newInput;
+    }
+
+    async function handleImageChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        els.submitBtn.disabled = true;
+        els.submitBtn.style.opacity = "0.5";
+        els.dropArea.style.pointerEvents = 'none';
+
+        try {
+            compressedImageBase64 = await compressImage(file, 800, 800, 0.7);
+            els.preview.src = compressedImageBase64;
+            els.container.classList.remove('hidden');
+            els.dropArea.classList.add('hidden');
+        } catch (error) {
+            console.error("فشل في معالجة الصورة:", error);
+            alert("حدث خطأ في معالجة الصورة، حاول مجدداً");
+            resetImageState();
+        } finally {
+            els.submitBtn.disabled = false;
+            els.submitBtn.style.opacity = "1";
+            els.dropArea.style.pointerEvents = 'auto';
+        }
+    }
+
+    function resetImageState() {
+        compressedImageBase64 = "";
+        els.preview.src = '';
+        els.container.classList.add('hidden');
+        els.dropArea.classList.remove('hidden');
+        els.dropArea.style.display = '';
+        recreateCameraInput();
+        els.submitBtn.disabled = false;
+        els.submitBtn.style.opacity = "1";
+    }
+
+    // تهيئة الـ input عند البدء
+    recreateCameraInput();
+
+    els.remove.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        resetImageState();
+    });
+
+    // ===================================================
+    // بناء قائمة الفواكه
+    // ===================================================
     if (fruitGrid) {
         fruits.forEach((fruit, index) => {
             const row = document.createElement('div');
@@ -108,13 +177,47 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
+    // ===================================================
+    // ضغط الصورة
+    // ===================================================
+    const compressImage = (file, maxWidth, maxHeight, quality) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                    } else {
+                        if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    };
+
+    // ===================================================
+    // تغيير حالة الفاكهة (inspected / na / damaged)
+    // ===================================================
     fruitGrid.addEventListener('change', (e) => {
         if (e.target.classList.contains('status-check')) {
             const fruitId = e.target.getAttribute('data-fruit');
             const type = e.target.getAttribute('data-type');
             const row = e.target.closest('.fruit-row');
             const damageWrapper = document.getElementById(`damage_input_${fruitId}`);
-            
+
             const checks = {
                 inspected: row.querySelector('[data-type="inspected"]'),
                 damaged: row.querySelector('[data-type="damaged"]'),
@@ -137,41 +240,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            const anyDamaged = Array.from(document.querySelectorAll('.status-check[data-type="damaged"]:checked')).length > 0;
+            const anyDamaged = document.querySelectorAll('.status-check[data-type="damaged"]:checked').length > 0;
             els.photoCard.classList.toggle('hidden', !anyDamaged);
-            els.cameraInput.required = anyDamaged;
         }
     });
 
-    els.cameraInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                els.preview.src = e.target.result;
-                els.container.classList.remove('hidden');
-                els.dropArea.classList.add('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    els.remove.onclick = () => {
-        els.cameraInput.value = '';
-        els.container.classList.add('hidden');
-        els.dropArea.classList.remove('hidden');
-        els.preview.src = '';
-    };
-
+    // ===================================================
+    // Modal
+    // ===================================================
     function showModal(type, title, message) {
         els.modal.classList.remove('hidden');
         els.modalLoader.classList.toggle('hidden', type !== 'loading');
         els.modalClose.classList.toggle('hidden', type === 'loading');
-        
+
         if (type !== 'loading') {
             const icon = type === 'success' ? 'check-circle' : 'alert-circle';
             const color = type === 'success' ? '#4caf50' : '#f44336';
-            els.modalIcon.innerHTML = `<i data-lucide="${icon}" style="width:60px; height:60px; color:${color}"></i>`;
+            els.modalIcon.innerHTML = `<i data-lucide="${icon}" style="width:60px;height:60px;color:${color}"></i>`;
             lucide.createIcons();
         } else {
             els.modalIcon.innerHTML = '';
@@ -189,12 +274,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetFullForm() {
         els.form.reset();
+        compressedImageBase64 = "";
         document.querySelectorAll('.status-check').forEach(cb => cb.checked = false);
         document.querySelectorAll('.damage-input-wrapper').forEach(w => w.classList.add('hidden'));
         document.querySelectorAll('.fruit-row').forEach(row => row.classList.remove('row-error'));
         els.photoCard.classList.add('hidden');
-        els.remove.click();
-        
+        resetImageState();
+
         const toggleBtn = document.querySelector('.show-more-btn');
         if (toggleBtn) toggleBtn.style.display = 'flex';
         document.querySelectorAll('.fruit-row').forEach((row, index) => {
@@ -203,12 +289,15 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    els.form.onsubmit = async (e) => {
+    // ===================================================
+    // إرسال النموذج
+    // ===================================================
+    els.form.addEventListener('submit', async (e) => {
         e.preventDefault();
+
         const empId = document.getElementById('employeeId').value;
         const branch = document.querySelector('input[name="branch"]:checked');
 
-        // التحقق من فحص جميع الأصناف ومن تعبئة الوزن للتالف
         let missingSelection = [];
         let missingWeight = [];
 
@@ -242,16 +331,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار...');
-
-        let base64Image = "";
-        if (els.cameraInput.files.length > 0) {
-            base64Image = await new Promise(resolve => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.readAsDataURL(els.cameraInput.files[0]);
-            });
+        // التحقق من الصورة إذا كان هناك تالف
+        const anyDamaged = document.querySelectorAll('.status-check[data-type="damaged"]:checked').length > 0;
+        if (anyDamaged && !compressedImageBase64) {
+            showModal('error', 'صورة مفقودة', 'يرجى تصوير الفواكه التالفة قبل الإرسال.');
+            return;
         }
+
+        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار...');
 
         let inspected = [], na = [], damaged = [];
         document.querySelectorAll('.fruit-row').forEach(row => {
@@ -276,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inspectedList: inspected.join(" - "),
             naList: na.join(" - "),
             damagedList: damaged.join(" - "),
-            image: base64Image
+            image: compressedImageBase64
         };
 
         fetch(SCRIPT_URL, {
@@ -287,10 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(() => {
             showModal('success', 'تم الإرسال', 'تم إرسال تقرير فحص الفاكهة بنجاح.');
-            handleTelegramNotifications(payload);
         })
         .catch(() => {
             showModal('error', 'فشل الإرسال', 'حدث خطأ في الشبكة.');
         });
-    };
+    });
 });
