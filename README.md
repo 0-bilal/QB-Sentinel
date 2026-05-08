@@ -1,1 +1,1 @@
-# -QB-Sentinel
+# QB-Sentinel
