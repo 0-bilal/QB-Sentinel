@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const els = {
         branchRadios: document.querySelectorAll('input[name="branch"]'),
         employeeGrid: document.getElementById('employeeGrid'),
-        // لا نحتاج لتخزين input هنا لأننا سنعيد إنشاءه
         preview: document.getElementById('imagePreview'),
         container: document.getElementById('imagePreviewContainer'),
         drop: document.getElementById('dropArea'),
@@ -43,100 +42,103 @@ document.addEventListener('DOMContentLoaded', () => {
     let compressedImageBase64 = null;
 
     // ===================================================
-    // الحل الجذري: إعادة إنشاء input الكاميرا من الصفر
-    // هذا يحل مشكلتين: 1) عدم استجابة الزر بعد الحذف
-    //                  2) رفض الصورة بعد اختيارها في بعض المتصفحات
+    // كشف نوع الجهاز
+    // ===================================================
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // ===================================================
+    // إعادة إنشاء input الكاميرا
+    //
+    // الإصلاح الرئيسي:
+    // 1- نضع الـ input خارج الـ label تماماً (في body)
+    //    حتى لا يُطلق الـ label حدث click تلقائياً عليه
+    //    → هذا يحل مشكلة فتح النافذة مرتين على الكمبيوتر
+    //
+    // 2- على الجوال: نضيف capture="environment" فقط
+    //    على الأجهزة المحمولة لتجنب مشكلة مساحة كروم
+    //    على الكمبيوتر: بدون capture لفتح مربع حوار الملفات العادي
     // ===================================================
     function recreateCameraInput() {
-        // احذف الـ input القديم إذا وُجد
         const oldInput = document.getElementById('cameraInput');
         if (oldInput) oldInput.remove();
 
-        // أنشئ input جديد
         const newInput = document.createElement('input');
         newInput.type = 'file';
         newInput.id = 'cameraInput';
         newInput.accept = 'image/*';
-        newInput.setAttribute('capture', 'environment');
-        newInput.hidden = true;
+        newInput.style.display = 'none';
 
-        // أضفه داخل الـ dropArea (label)
-        els.drop.appendChild(newInput);
+        // capture فقط على الجوال لتجنب مشكلة مساحة كروم
+        if (isMobile) {
+            newInput.setAttribute('capture', 'environment');
+        }
 
-        // أضف الـ event listener للـ input الجديد
+        // نضعه في body وليس داخل label
+        document.body.appendChild(newInput);
+
         newInput.addEventListener('change', handleImageChange);
-
         return newInput;
     }
 
-    // دالة معالجة تغيير الصورة (منفصلة لإعادة الاستخدام)
+    // ===================================================
+    // فتح نافذة اختيار الصورة عند الضغط على dropArea
+    // نفتح الـ input يدوياً بدلاً من الاعتماد على label
+    // ===================================================
+    els.drop.addEventListener('click', (e) => {
+        e.preventDefault(); // منع الـ label من إرسال click مرة ثانية
+        const input = document.getElementById('cameraInput');
+        if (input) input.click();
+    });
+
+    // ===================================================
+    // معالجة الصورة بعد الاختيار
+    // ===================================================
     async function handleImageChange(e) {
         const file = e.target.files[0];
         if (!file) return;
 
         els.submitBtn.disabled = true;
-        els.submitBtn.style.opacity = "0.5";
-        
-        // أظهر حالة الضغط بدون تغيير innerHTML للـ label
-        const originalContent = els.drop.innerHTML;
+        els.submitBtn.style.opacity = '0.5';
         els.drop.style.pointerEvents = 'none';
-        
+
         try {
             compressedImageBase64 = await compressImage(file, 800, 800, 0.7);
             els.preview.src = compressedImageBase64;
             els.container.classList.remove('hidden');
             els.drop.classList.add('hidden');
         } catch (error) {
-            console.error("فشل في معالجة الصورة:", error);
-            alert("فشل في معالجة الصورة، حاول مجدداً");
+            console.error('فشل في معالجة الصورة:', error);
+            alert('فشل في معالجة الصورة، حاول مجدداً');
             resetImageState();
         } finally {
             els.submitBtn.disabled = false;
-            els.submitBtn.style.opacity = "1";
+            els.submitBtn.style.opacity = '1';
             els.drop.style.pointerEvents = 'auto';
         }
     }
 
-    // دالة إعادة تعيين واجهة الرفع
+    // ===================================================
+    // إعادة تعيين حالة الصورة
+    // ===================================================
     function resetImageState() {
         compressedImageBase64 = null;
-
-        // أخفِ المعاينة وأظهر منطقة الرفع
+        els.preview.src = '';
         els.container.classList.add('hidden');
         els.drop.classList.remove('hidden');
         els.drop.style.display = '';
-
-        // أعد إنشاء الـ input (الحل الجذري)
         recreateCameraInput();
-
         els.submitBtn.disabled = false;
-        els.submitBtn.style.opacity = "1";
-        els.submitBtn.style.cursor = "pointer";
+        els.submitBtn.style.opacity = '1';
+        els.submitBtn.style.cursor = 'pointer';
     }
 
-    // تهيئة الـ input عند بدء التشغيل
+    // تهيئة عند البدء
     recreateCameraInput();
 
-    // ===================================================
-    // ربط زر حذف الصورة - بدون preventDefault لتجنب أي تعارض
-    // ===================================================
-    els.remove.addEventListener('click', function(e) {
+    els.remove.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         resetImageState();
-    });
-
-    // ===================================================
-    // ربط الـ dropArea بفتح الكاميرا عند الضغط عليه
-    // ===================================================
-    els.drop.addEventListener('click', function(e) {
-        // تجنب التداخل مع label الافتراضي
-        if (e.target === els.drop || e.target.closest('#dropArea')) {
-            const currentInput = document.getElementById('cameraInput');
-            if (currentInput) {
-                currentInput.click();
-            }
-        }
     });
 
     // ===================================================
@@ -205,6 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
         els.modalMsg.innerText = message;
         els.modalLoader.classList.add('hidden');
         els.modalClose.classList.add('hidden');
+        els.modalIcon.innerHTML = '';
+
         if (type === 'loading') {
             els.modalLoader.classList.remove('hidden');
         } else {
@@ -235,8 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showModal('loading', 'جاري الإرسال', 'يرجى الانتظار...');
 
         const payload = {
-            branch: branch.value === "Muzahmiyah" ? "المزاحمية" : "الدوادمي",
-            senderName: employeeDatabase[empId] || "موظف رقم: " + empId,
+            branch: branch.value === 'Muzahmiyah' ? 'المزاحمية' : 'الدوادمي',
+            senderName: employeeDatabase[empId] || 'موظف رقم: ' + empId,
             cleanerName: empName.value,
             equipmentAr: equipment.parentElement.querySelector('span').innerText,
             equipmentEn: equipment.parentElement.querySelector('small').innerText,
