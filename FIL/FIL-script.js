@@ -59,22 +59,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // إعادة إنشاء input الكاميرا من الصفر (نفس حل ECL)
     // ===================================================
     function recreateCameraInput() {
-        const oldInput = document.getElementById('cameraInput');
-        if (oldInput) oldInput.remove();
+    const oldInput = document.getElementById('cameraInput');
+    if (oldInput) oldInput.remove();
 
-        const newInput = document.createElement('input');
-        newInput.type = 'file';
-        newInput.id = 'cameraInput';
-        newInput.accept = 'image/*';
-        newInput.setAttribute('capture', 'environment');
-        newInput.hidden = true;
+    const newInput = document.createElement('input');
+    newInput.type = 'file';
+    // استخدام رقم عشوائي يجعل المتصفح يظن أنه حقل جديد تماماً
+    newInput.id = 'cameraInput_' + Math.random().toString(36).substr(2, 9); 
+    newInput.accept = 'image/*';
+    newInput.style.display = 'none';
 
-        els.dropArea.appendChild(newInput);
-        newInput.addEventListener('change', handleImageChange);
+    document.body.appendChild(newInput);
+    newInput.addEventListener('change', handleImageChange);
 
-        return newInput;
-    }
-
+    return newInput;
+}
     async function handleImageChange(e) {
         const file = e.target.files[0];
         if (!file) return;
