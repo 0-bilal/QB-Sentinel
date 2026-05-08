@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // رابط Google Apps Script الخاص بك
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxU2Qg-0qTFh8foxZ9lZDEKwM6oAJfBbO4N8tRn8XKitjXvu8mh3u4ph7dqcFyzA8I/exec';
+    // ⚠️ رابط النشر الخاص بك
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytKqA0y-YWMiy_VOAdd6GQrhcNprzpSUCRDcjAlsrx6NN4-WKWCOV9d1KfdiSdQL8W/exec';
 
-    // قاعدة بيانات الموظفين للتحقق من الرقم الوظيفي
     const employeeDatabase = {
         "1000": "بلال",
         "1101": "رمان",
@@ -12,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
         "1711": "دورجا"
     };
 
-    // قائمة الموظفين حسب الفرع
     const branchEmployees = {
         "Muzahmiyah": [
             { ar: "رمان", en: "Rumaan" },
@@ -25,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    // العناصر البرمجية (DOM Elements)
     const els = {
         branchRadios: document.querySelectorAll('input[name="branch"]'),
         employeeGrid: document.getElementById('employeeGrid'),
@@ -43,45 +40,37 @@ document.addEventListener('DOMContentLoaded', () => {
         modalClose: document.getElementById('modalClose')
     };
 
-    // 1. تحديث قائمة الموظفين عند تغيير الفرع
     els.branchRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             const selectedBranch = e.target.value;
             const employees = branchEmployees[selectedBranch] || [];
-            
-            els.employeeGrid.innerHTML = ''; // مسح المحتوى القديم
-
+            els.employeeGrid.innerHTML = ''; 
             employees.forEach((emp, index) => {
                 const id = `emp_${index}`;
-                const tile = document.createElement('div');
-                tile.className = "employee-option"; // كلاس اختياري للتنسيق
-                tile.innerHTML = `
-                    <input type="radio" id="${id}" name="employeeName" value="${emp.ar}" required>
-                    <label for="${id}" class="branch-tile">
-                        <i data-lucide="user"></i>
-                        <div class="tile-text">
-                            <span>${emp.ar}</span>
-                            <small>${emp.en}</small>
-                        </div>
-                    </label>
-                `;
-                els.employeeGrid.appendChild(tile);
+                els.employeeGrid.innerHTML += `
+                    <div class="employee-option">
+                        <input type="radio" id="${id}" name="employeeName" value="${emp.ar}" required>
+                        <label for="${id}" class="branch-tile">
+                            <i data-lucide="user"></i>
+                            <div class="tile-text">
+                                <span>${emp.ar}</span>
+                                <small>${emp.en}</small>
+                            </div>
+                        </label>
+                    </div>`;
             });
-            lucide.createIcons(); 
+            lucide.createIcons();
         });
     });
 
-    // 2. وظائف الرسائل المنبثقة (Modal)
     const showModal = (type, title, message) => {
         els.modal.classList.remove('hidden');
         els.modalTitle.innerText = title;
         els.modalMsg.innerText = message;
         els.modalLoader.classList.add('hidden');
         els.modalClose.classList.add('hidden');
-        
-        if (type === 'loading') {
-            els.modalLoader.classList.remove('hidden');
-        } else {
+        if (type === 'loading') { els.modalLoader.classList.remove('hidden'); }
+        else { 
             els.modalClose.classList.remove('hidden');
             const icon = type === 'success' ? 'check-circle' : 'alert-circle';
             els.modalIcon.innerHTML = `<i data-lucide="${icon}" class="${type}-icon"></i>`;
@@ -91,13 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     els.modalClose.onclick = () => els.modal.classList.add('hidden');
 
-    // 3. معاينة الصورة الملتقطة
     els.input.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                els.preview.src = event.target.result;
+            reader.onload = (ev) => {
+                els.preview.src = ev.target.result;
                 els.container.classList.remove('hidden');
                 els.drop.classList.add('hidden');
             };
@@ -109,71 +97,55 @@ document.addEventListener('DOMContentLoaded', () => {
         els.input.value = "";
         els.container.classList.add('hidden');
         els.drop.classList.remove('hidden');
-        els.preview.src = "";
     };
 
-    // 4. إرسال النموذج ومعالجة البيانات
-    els.form.addEventListener('submit', async (e) => {
+    els.form.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // تجميع عناصر التحقق
-        const branchInput = document.querySelector('input[name="branch"]:checked');
-        const empNameInput = document.querySelector('input[name="employeeName"]:checked');
-        const equipmentInput = document.querySelector('input[name="equipment"]:checked');
-        const empIdValue = document.getElementById('employeeId').value.trim();
-        const photoFile = els.input.files[0];
+        const branch = document.querySelector('input[name="branch"]:checked');
+        const empName = document.querySelector('input[name="employeeName"]:checked');
+        const equipment = document.querySelector('input[name="equipment"]:checked');
+        const empId = document.getElementById('employeeId').value;
+        const file = els.input.files[0];
 
-        // فحص البيانات المطلوبة قبل الإرسال
-        if (!branchInput || !empNameInput || !equipmentInput || !photoFile || !empIdValue) {
-            showModal('error', 'بيانات ناقصة', 'يرجى إكمال جميع الحقول والتقاط صورة الجهاز.');
+        if (!branch || !empName || !equipment || !file) {
+            showModal('error', 'بيانات ناقصة', 'يرجى إكمال جميع الحقول والتقاط الصورة.');
             return;
         }
 
-        showModal('loading', 'جاري إرسال التقرير', 'يرجى الانتظار حتى اكتمال رفع البيانات والصورة...');
+        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم الآن رفع البيانات والصورة إلى السجل...');
 
-        // استخراج نصوص المعدة
-        const equipmentAr = equipmentInput.parentElement.querySelector('span').innerText;
-        const equipmentEn = equipmentInput.parentElement.querySelector('small').innerText;
-        const equipmentId = equipmentInput.getAttribute('data-id');
-
-        // قراءة الصورة كـ Base64 وإرسال الطلب
         const reader = new FileReader();
-        reader.readAsDataURL(photoFile);
-        reader.onload = async () => {
+        reader.readAsDataURL(file);
+        reader.onload = function() {
+            const base64Data = reader.result;
+            
             const payload = {
-                branch: branchInput.nextElementSibling.querySelector('span').innerText,
-                senderName: employeeDatabase[empIdValue] || "موظف غير معروف (" + empIdValue + ")",
-                cleanerName: empNameInput.value,
-                equipmentAr: equipmentAr,
-                equipmentEn: equipmentEn,
-                equipmentId: equipmentId,
-                image: reader.result // ملف الـ Base64
+                branch: branch.value === "Muzahmiyah" ? "المزاحمية" : "الدوادمي",
+                senderName: employeeDatabase[empId] || "موظف رقم: " + empId,
+                cleanerName: empName.value,
+                equipmentAr: equipment.parentElement.querySelector('span').innerText,
+                equipmentEn: equipment.parentElement.querySelector('small').innerText,
+                equipmentId: equipment.getAttribute('data-id'),
+                image: base64Data
             };
 
-            try {
-                // إرسال البيانات باستخدام fetch بصيغة POST
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // ضروري لطلبات Apps Script من متصفح خارجي
-                    body: JSON.stringify(payload)
-                });
-
-                // ملاحظة: مع no-cors لن نتمكن من قراءة الـ JSON العائد، سنفترض النجاح إذا لم يحدث Error
-                showModal('success', 'تم بنجاح', 'تم تسجيل عملية التنظيف ورفع الصورة بنجاح.');
-                
-                // إعادة ضبط النموذج
+            // حل مشكلة CORS عبر إرسال البيانات كـ text/plain
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // نتجنب فحص CORS
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                // في وضع no-cors لا يمكن قراءة الرد، لذا نفترض النجاح إذا لم يحدث خطأ شبكة
+                showModal('success', 'تم بنجاح', 'تم تسجيل البيانات في شيت جوجل وحفظ الصورة بنجاح.');
                 els.form.reset();
-                els.employeeGrid.innerHTML = '<span>يرجى اختيار الفرع</span><small>Please select the branch</small>';
                 els.remove.click();
-
-            } catch (error) {
-                console.error("Submission error:", error);
-                showModal('error', 'فشل الإرسال', 'تعذر الاتصال بالخادم، يرجى التحقق من اتصال الإنترنت.');
-            }
-        };
-
-        reader.onerror = () => {
-            showModal('error', 'خطأ في الصورة', 'فشل في معالجة ملف الصورة.');
+            })
+            .catch(err => {
+                showModal('error', 'خطأ في الشبكة', 'تعذر الوصول للسيرفر: ' + err.message);
+            });
         };
     });
 });
