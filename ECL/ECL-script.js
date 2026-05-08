@@ -51,22 +51,21 @@ document.addEventListener('DOMContentLoaded', () => {
     //    يمنع فتح نافذة الاختيار مرتين على الكمبيوتر
     // ===================================================
     function recreateCameraInput() {
-        const oldInput = document.getElementById('cameraInput');
-        if (oldInput) oldInput.remove();
+    const oldInput = document.getElementById('cameraInput');
+    if (oldInput) oldInput.remove();
 
-        const newInput = document.createElement('input');
-        newInput.type = 'file';
-        newInput.id = 'cameraInput';
-        newInput.accept = 'image/*';
-        // ❌ بدون capture نهائياً
-        newInput.style.display = 'none';
+    const newInput = document.createElement('input');
+    newInput.type = 'file';
+    // استخدام رقم عشوائي يجعل المتصفح يظن أنه حقل جديد تماماً
+    newInput.id = 'cameraInput_' + Math.random().toString(36).substr(2, 9); 
+    newInput.accept = 'image/*';
+    newInput.style.display = 'none';
 
-        // في body وليس داخل label
-        document.body.appendChild(newInput);
-        newInput.addEventListener('change', handleImageChange);
+    document.body.appendChild(newInput);
+    newInput.addEventListener('change', handleImageChange);
 
-        return newInput;
-    }
+    return newInput;
+}
 
     // فتح نافذة الاختيار عند الضغط على منطقة الرفع
     els.drop.addEventListener('click', (e) => {
