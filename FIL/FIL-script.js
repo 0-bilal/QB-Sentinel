@@ -11,52 +11,58 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const fruits = [
-        { id: 'f1', ar: 'فراولة', en: 'Strawberry' },
-        { id: 'f2', ar: 'مانجو', en: 'Mango' },
-        { id: 'f3', ar: 'أفوكادو', en: 'Avocado' },
-        { id: 'f4', ar: 'موز', en: 'Banana' },
-        { id: 'f5', ar: 'برتقال', en: 'Orange' },
-        { id: 'f6', ar: 'كيوي', en: 'Kiwi' },
-        { id: 'f7', ar: 'أناناس', en: 'Pineapple' },
-        { id: 'f8', ar: 'رمان', en: 'Pomegranate' },
-        { id: 'f9', ar: 'الشمندر', en: 'Beetroot' },
-        { id: 'f10', ar: 'جزر', en: 'Carrot' },
-        { id: 'f11', ar: 'ليمون', en: 'Lemon' },
-        { id: 'f12', ar: 'بطيخ', en: 'Watermelon' },
-        { id: 'f13', ar: 'تفاح أخضر', en: 'Green Apple' },
-        { id: 'f14', ar: 'تفاح أحمر', en: 'Red Apple' },
-        { id: 'f15', ar: 'شمام', en: 'Sweet Melo' },
-        { id: 'f16', ar: 'توت أزرق', en: 'Blueberry' },
-        { id: 'f17', ar: 'بلاك بيري', en: 'Blackberry' },
-        { id: 'f18', ar: 'توت احمر', en: 'Raspberry' },
-        { id: 'f19', ar: 'خوخ', en: 'Peach' },
-        { id: 'f20', ar: 'عنب', en: 'Geape' },
-        { id: 'f21', ar: 'نعناع', en: 'Mint' }
+        { id: 'f1',  ar: 'فراولة',      en: 'Strawberry'  },
+        { id: 'f2',  ar: 'مانجو',        en: 'Mango'       },
+        { id: 'f3',  ar: 'أفوكادو',      en: 'Avocado'     },
+        { id: 'f4',  ar: 'موز',          en: 'Banana'      },
+        { id: 'f5',  ar: 'برتقال',       en: 'Orange'      },
+        { id: 'f6',  ar: 'كيوي',         en: 'Kiwi'        },
+        { id: 'f7',  ar: 'أناناس',       en: 'Pineapple'   },
+        { id: 'f8',  ar: 'رمان',         en: 'Pomegranate' },
+        { id: 'f9',  ar: 'الشمندر',      en: 'Beetroot'    },
+        { id: 'f10', ar: 'جزر',          en: 'Carrot'      },
+        { id: 'f11', ar: 'ليمون',        en: 'Lemon'       },
+        { id: 'f12', ar: 'بطيخ',         en: 'Watermelon'  },
+        { id: 'f13', ar: 'تفاح أخضر',    en: 'Green Apple' },
+        { id: 'f14', ar: 'تفاح أحمر',    en: 'Red Apple'   },
+        { id: 'f15', ar: 'شمام',         en: 'Sweet Melo'  },
+        { id: 'f16', ar: 'توت أزرق',     en: 'Blueberry'   },
+        { id: 'f17', ar: 'بلاك بيري',    en: 'Blackberry'  },
+        { id: 'f18', ar: 'توت احمر',     en: 'Raspberry'   },
+        { id: 'f19', ar: 'خوخ',          en: 'Peach'       },
+        { id: 'f20', ar: 'عنب',          en: 'Geape'       },
+        { id: 'f21', ar: 'نعناع',        en: 'Mint'        }
     ];
 
     const fruitGrid = document.getElementById('fruitGrid');
     const INITIAL_VISIBLE_COUNT = 3;
 
     const els = {
-        form: document.getElementById('fruitReportForm'),
-        submitBtn: document.getElementById('submitBtn'),
-        photoCard: document.getElementById('photoCard'),
-        preview: document.getElementById('imagePreview'),
-        container: document.getElementById('imagePreviewContainer'),
-        dropArea: document.getElementById('dropArea'),
-        remove: document.getElementById('removeImage'),
-        modal: document.getElementById('customModal'),
-        modalIcon: document.getElementById('modalIcon'),
-        modalTitle: document.getElementById('modalTitle'),
+        form:         document.getElementById('fruitReportForm'),
+        submitBtn:    document.getElementById('submitBtn'),
+        photoCard:    document.getElementById('photoCard'),
+        preview:      document.getElementById('imagePreview'),
+        container:    document.getElementById('imagePreviewContainer'),
+        dropArea:     document.getElementById('dropArea'),
+        remove:       document.getElementById('removeImage'),
+        modal:        document.getElementById('customModal'),
+        modalIcon:    document.getElementById('modalIcon'),
+        modalTitle:   document.getElementById('modalTitle'),
         modalMessage: document.getElementById('modalMessage'),
-        modalLoader: document.getElementById('modalLoader'),
-        modalClose: document.getElementById('modalClose')
+        modalLoader:  document.getElementById('modalLoader'),
+        modalClose:   document.getElementById('modalClose')
     };
 
     let compressedImageBase64 = "";
 
     // ===================================================
-    // إعادة إنشاء input الكاميرا من الصفر (نفس حل ECL)
+    // إنشاء input الكاميرا
+    //
+    // ✅ بدون capture نهائياً — نفس حل ECL
+    //    يمنع كروم من حجز مساحة مؤقتة تسبب خطأ "مساحة منخفضة"
+    //
+    // ✅ الـ input في document.body وليس داخل label
+    //    يمنع فتح نافذة الاختيار مرتين على الكمبيوتر
     // ===================================================
     function recreateCameraInput() {
         const oldInput = document.getElementById('cameraInput');
@@ -75,6 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return newInput;
     }
+
+    // فتح نافذة الاختيار عند الضغط على منطقة الرفع
+    els.dropArea.addEventListener('click', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('cameraInput');
+        if (input) input.click();
+    });
+
+    // ===================================================
+    // معالجة الصورة بعد الاختيار
+    // ===================================================
     async function handleImageChange(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -99,6 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ===================================================
+    // إعادة تعيين حالة الصورة
+    // ===================================================
     function resetImageState() {
         compressedImageBase64 = "";
         els.preview.src = '';
@@ -110,10 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
         els.submitBtn.style.opacity = "1";
     }
 
-    // تهيئة الـ input عند البدء
+    // تهيئة عند البدء
     recreateCameraInput();
 
-    els.remove.addEventListener('click', function (e) {
+    els.remove.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         resetImageState();
@@ -209,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===================================================
-    // تغيير حالة الفاكهة (inspected / na / damaged)
+    // تغيير حالة الفاكهة
     // ===================================================
     fruitGrid.addEventListener('change', (e) => {
         if (e.target.classList.contains('status-check')) {
@@ -220,8 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const checks = {
                 inspected: row.querySelector('[data-type="inspected"]'),
-                damaged: row.querySelector('[data-type="damaged"]'),
-                na: row.querySelector('[data-type="na"]')
+                damaged:   row.querySelector('[data-type="damaged"]'),
+                na:        row.querySelector('[data-type="na"]')
             };
 
             row.classList.remove('row-error');
@@ -254,14 +274,14 @@ document.addEventListener('DOMContentLoaded', () => {
         els.modalClose.classList.toggle('hidden', type === 'loading');
 
         if (type !== 'loading') {
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            const color = type === 'success' ? '#4caf50' : '#f44336';
+            const icon  = type === 'success' ? 'check-circle' : 'alert-circle';
+            const color = type === 'success' ? '#4caf50'      : '#f44336';
             els.modalIcon.innerHTML = `<i data-lucide="${icon}" style="width:60px;height:60px;color:${color}"></i>`;
             lucide.createIcons();
         } else {
             els.modalIcon.innerHTML = '';
         }
-        els.modalTitle.innerText = title;
+        els.modalTitle.innerText   = title;
         els.modalMessage.innerText = message;
     }
 
@@ -295,16 +315,16 @@ document.addEventListener('DOMContentLoaded', () => {
     els.form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const empId = document.getElementById('employeeId').value;
+        const empId  = document.getElementById('employeeId').value;
         const branch = document.querySelector('input[name="branch"]:checked');
 
         let missingSelection = [];
-        let missingWeight = [];
+        let missingWeight    = [];
 
         document.querySelectorAll('.fruit-row').forEach(row => {
-            const nameAr = row.getAttribute('data-fruit-name');
-            const isChecked = row.querySelector('.status-check:checked');
-            const isDamaged = row.querySelector('[data-type="damaged"]').checked;
+            const nameAr      = row.getAttribute('data-fruit-name');
+            const isChecked   = row.querySelector('.status-check:checked');
+            const isDamaged   = row.querySelector('[data-type="damaged"]').checked;
             const weightInput = row.querySelector('.damage-qty');
 
             if (!isChecked) {
@@ -320,18 +340,15 @@ document.addEventListener('DOMContentLoaded', () => {
             showModal('error', 'تقرير غير مكتمل', `يرجى فحص جميع الأصناف. لم يتم فحص: ${missingSelection.slice(0, 3).join('، ')}`);
             return;
         }
-
         if (missingWeight.length > 0) {
             showModal('error', 'وزن التالف مفقود', `يرجى إدخال وزن التالف لـ: ${missingWeight.slice(0, 3).join('، ')}`);
             return;
         }
-
         if (!branch || !employeeDatabase[empId]) {
             showModal('error', 'بيانات ناقصة', 'يرجى اختيار الفرع والتأكد من كود الموظف.');
             return;
         }
 
-        // التحقق من الصورة إذا كان هناك تالف
         const anyDamaged = document.querySelectorAll('.status-check[data-type="damaged"]:checked').length > 0;
         if (anyDamaged && !compressedImageBase64) {
             showModal('error', 'صورة مفقودة', 'يرجى تصوير الفواكه التالفة قبل الإرسال.');
@@ -342,8 +359,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let inspected = [], na = [], damaged = [];
         document.querySelectorAll('.fruit-row').forEach(row => {
-            const nameAr = row.getAttribute('data-fruit-name');
-            const isNA = row.querySelector('[data-type="na"]').checked;
+            const nameAr    = row.getAttribute('data-fruit-name');
+            const isNA      = row.querySelector('[data-type="na"]').checked;
             const isDamaged = row.querySelector('[data-type="damaged"]').checked;
             const isInspected = row.querySelector('[data-type="inspected"]').checked;
 
@@ -356,14 +373,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const payload = {
-            reportType: "فحص جودة الفواكه",
-            branch: branch.value === "Muzahmiyah" ? "المزاحمية" : "الدوادمي",
-            employeeId: empId,
-            employeeName: employeeDatabase[empId],
+            reportType:    "فحص جودة الفواكه",
+            branch:        branch.value === "Muzahmiyah" ? "المزاحمية" : "الدوادمي",
+            employeeId:    empId,
+            employeeName:  employeeDatabase[empId],
             inspectedList: inspected.join(" - "),
-            naList: na.join(" - "),
-            damagedList: damaged.join(" - "),
-            image: compressedImageBase64
+            naList:        na.join(" - "),
+            damagedList:   damaged.join(" - "),
+            image:         compressedImageBase64
         };
 
         fetch(SCRIPT_URL, {
