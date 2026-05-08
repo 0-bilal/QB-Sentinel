@@ -44,16 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================================
     // إنشاء input الكاميرا
     //
-    // ✅ لا نستخدم capture="environment" نهائياً
-    //    السبب: capture يجبر كروم على فتح الكاميرا مباشرة
-    //    ويحجز مساحة تخزين مؤقتة → يظهر خطأ "مساحة منخفضة"
+    // ✅ بدون capture نهائياً — نفس حل FIL
+    //    يمنع كروم من حجز مساحة مؤقتة تسبب خطأ "مساحة منخفضة"
     //
-    // ✅ بدون capture، كروم يفتح قائمة اختيار:
-    //    "التقاط صورة" أو "اختيار من المعرض"
-    //    وفي كلتا الحالتين لا يحجز مساحة مسبقة
-    //
-    // ✅ الـ input خارج الـ label في body
-    //    لمنع فتح النافذة مرتين على الكمبيوتر
+    // ✅ الـ input في document.body وليس داخل label
+    //    يمنع فتح نافذة الاختيار مرتين على الكمبيوتر
     // ===================================================
     function recreateCameraInput() {
         const oldInput = document.getElementById('cameraInput');
@@ -63,11 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
         newInput.type = 'file';
         newInput.id = 'cameraInput';
         newInput.accept = 'image/*';
-        // ❌ بدون capture نهائياً - هذا هو الحل الجذري
+        // ❌ بدون capture نهائياً
         newInput.style.display = 'none';
 
+        // في body وليس داخل label
         document.body.appendChild(newInput);
         newInput.addEventListener('change', handleImageChange);
+
         return newInput;
     }
 
@@ -86,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         els.submitBtn.disabled = true;
-        els.submitBtn.style.opacity = '0.5';
+        els.submitBtn.style.opacity = "0.5";
         els.drop.style.pointerEvents = 'none';
 
         try {
@@ -95,12 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
             els.container.classList.remove('hidden');
             els.drop.classList.add('hidden');
         } catch (error) {
-            console.error('فشل في معالجة الصورة:', error);
-            alert('فشل في معالجة الصورة، حاول مجدداً');
+            console.error("فشل في معالجة الصورة:", error);
+            alert("حدث خطأ في معالجة الصورة، حاول مجدداً");
             resetImageState();
         } finally {
             els.submitBtn.disabled = false;
-            els.submitBtn.style.opacity = '1';
+            els.submitBtn.style.opacity = "1";
             els.drop.style.pointerEvents = 'auto';
         }
     }
@@ -116,8 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         els.drop.style.display = '';
         recreateCameraInput();
         els.submitBtn.disabled = false;
-        els.submitBtn.style.opacity = '1';
-        els.submitBtn.style.cursor = 'pointer';
+        els.submitBtn.style.opacity = "1";
     }
 
     // تهيئة عند البدء
