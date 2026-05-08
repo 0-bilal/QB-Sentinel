@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سجل تنظيف المعدات | Equipment Cleaning Log</title>
-    <link rel="stylesheet" href="style.css">
+    <title>التقارير | QB-Sentinel</title>
+    <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="icon" type="image/x-icon" href="ico/logo.ico">
+    <link rel="icon" type="image/x-icon" href="/ico/logo.ico">
 </head>
 <body>
 
@@ -24,195 +24,49 @@
     <header class="main-header">
         <div class="header-overlay"></div>
         <div class="logo-area">
-            <img src="ico/logo.ico" alt="Logo" class="logo">
-            <h1>سجل تنظيف المعدات</h1>
-            <p class="en-sub-header">EQUIPMENT CLEANING LOG</p>
+            <img src="/ico/logo.ico" alt="Logo" class="logo">
+            <h1>قائمه التقارير عصير تايم (الدوادمي & المزاحمية) </h1>
+            <p class="en-sub-header">LIST OF REPORTS ASEERTIME</p>
         </div>
     </header>
 
     <form id="cleaningReportForm" novalidate>
         <div class="card info-card">
-            <p class="description">يرجى تصوير الجهاز بوضوح بعد الانتهاء من عملية التنظيف.</p>
-            <p class="description en-text">Please capture a clear photo after cleaning.</p>
-            <div class="required-indicator">* مطلوب / Required</div>
+            <p class="description">"يُعتبر سجل QB-Sentinel أداة استراتيجية تهدف إلى تعزيز معايير الجودة والشفافية في العمليات التشغيلية لشركة عصير تايم."</p>
+            <p class="description en-text"></p>
+            <div class="required-indicator"></div>
         </div>
 
-        <div class="card" id="branchCard">
-            <label class="label-heading">اختيار الفرع / Select Branch <span class="required">*</span></label>
-            <div class="branch-grid">
-                <input type="radio" id="branch1" name="branch" value="Dawadimi" required>
-                <label for="branch1" class="branch-tile">
-                    <i data-lucide="map-pin"></i>
-                    <div class="tile-text">
-                        <span>الدوادمي</span>
-                        <small>Al-Dawadimi</small>
-                    </div>
-                </label>
-
-                <input type="radio" id="branch2" name="branch" value="Muzahmiyah">
-                <label for="branch2" class="branch-tile">
-                    <i data-lucide="map-pin"></i>
-                    <div class="tile-text">
-                        <span>المزاحمية</span>
-                        <small>Al-Muzahmiyah</small>
-                    </div>
-                </label>
-            </div>
+        <div class="reports-grid">
+    
+    <a href="ECL.html" class="report-card">
+        <div class="report-card-icon">
+            <i data-lucide="refrigerator"></i>
         </div>
-
-        <div class="card" id="employeeCard">
-            <label class="label-heading">تم التنظيف بواسطة / Cleaned By <span class="required">*</span></label>
-            <div id="employeeGrid" class="branch-grid">
-                        <span>يرجى اختيار الفرع </span>
-                        <small>Please select the branch</small>
-            </div>
+        <div class="report-card-body">
+            <h3>سجل تنظيف المعدات</h3>
+            <p>Equipment Cleaning Log</p>
+            <span class="report-tag">ECL</span>
         </div>
-
-        <div class="card" id="idCard">
-            <label class="label-heading">رقم الموظف للتحقق / Employee ID <span class="required">*</span></label>
-            <div class="modern-input">
-                <i data-lucide="hash"></i>
-                <input type="number" id="employeeId" placeholder="ID Number" required>
-            </div>
+        <div class="report-card-arrow">
+            <i data-lucide="chevron-left"></i>
         </div>
+    </a>
 
-        <div class="card" id="equipmentCard">
-            <label class="label-heading">الجهاز التي تم تنظيفه / Equipment <span class="required">*</span></label>
-            <div class="check-group">
-
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Ice cream machine #1" data-id="EQ-101">
-                    <div class="check-content">
-                        <span>ماكينة آيس كريم #1</span>
-                        <small>Ice cream machine #1</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Ice cream machine #2" data-id="EQ-102">
-                    <div class="check-content">
-                        <span>ماكينة آيس كريم #2</span>
-                        <small>Ice cream machine #2</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-103">
-                    <div class="check-content">
-                        <span>ماكينة الميني بان كيك</span>
-                        <small>Mini pancake machine</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-104">
-                    <div class="check-content">
-                        <span>ماكينة الوافل</span>
-                        <small>waffle maker</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-105">
-                    <div class="check-content">
-                        <span>ماكينة البان كيك</span>
-                        <small>pancake machine</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-106">
-                    <div class="check-content">
-                        <span>ماكينة عصر  البرتقال</span>
-                        <small>Orange juice machine</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-107">
-                    <div class="check-content">
-                        <span>ماكينة عصر الشمندر</span>
-                        <small>Beetroot juicer</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-108">
-                    <div class="check-content">
-                        <span>ماكينة تسخين الصوصات</span>
-                        <small>Sauce warmer</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-109">
-                    <div class="check-content">
-                        <span>مكيف صالة المحل</span>
-                        <small>Shop hall air conditioner</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-110">
-                    <div class="check-content">
-                        <span>مكيف المطبخ</span>
-                        <small>kitchen air conditioner</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-111">
-                    <div class="check-content">
-                        <span>علب صوص : بستاشيو ، نوتيلا ، لوتس</span>
-                        <small>Containers : pistachio, nutella, lotus</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-112">
-                    <div class="check-content">
-                        <span>علب صوص :  شوكولاتة داكنة ، شوكولاتة بيضاء</span>
-                        <small>Containers : dark chocolate, white chocolate</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-113">
-                    <div class="check-content">
-                        <span>علب صوص : كيندر ، فيريرو روشيه  ، أوريو</span>
-                        <small>Containers : Kinder, Ferrero Rocher, Oreo</small>
-                    </div>
-                </label>
-                <label class="check-tile">
-                    <input type="checkbox" name="equipment" value="Sauce Station - Red" data-id="EQ-114">
-                    <div class="check-content">
-                        <span>علب صوص : السيروب</span>
-                        <small>Containers : Syrup</small>
-                    </div>
-                </label>
-            </div>
+    <a href="/FIL.html" class="report-card">
+        <div class="report-card-icon">
+            <i data-lucide="apple"></i>
         </div>
-
-        <div class="card" id="photoCard">
-            <label class="label-heading">التوثيق بالصورة / Photo Evidence <span class="required">*</span></label>
-            <div class="camera-wrapper">
-                <label for="cameraInput" class="camera-trigger" id="dropArea">
-                    <div class="icon-circle">
-                        <i data-lucide="camera"></i>
-                    </div>
-                    <p>التقط صورة الآن</p>
-                    <small>Take a Photo</small>
-                    <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden required>
-                </label>
-                
-                <div id="imagePreviewContainer" class="hidden">
-                    <div class="preview-frame">
-                        <img id="imagePreview" src="" alt="Preview">
-                        <button type="button" id="removeImage" class="remove-overlay">
-                            <i data-lucide="x-circle"></i> حذف وإعادة التصوير
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="report-card-body">
+            <h3>سجل فحص الفواكه</h3>
+            <p>Fruit Inspection Log</p>
+            <span class="report-tag">FIL</span>
         </div>
-
-        <div class="actions">
-            <button type="submit" class="submit-btn" id="submitBtn">
-                <span class="btn-content">
-                    <i data-lucide="check-circle"></i>
-                    إرسال التقرير / Submit
-                </span>
-            </button>
+        <div class="report-card-arrow">
+            <i data-lucide="chevron-left"></i>
         </div>
-    </form>
+    </a>
+
 </div>
 
 <footer class="developer-footer">
@@ -232,13 +86,13 @@
             </div>
             <div class="version-badge">
                 <span class="version-label">Version</span>
-                <span class="version-number">v1.2.2</span>
+                <span class="version-number">v1.12.20</span>
             </div>
         </div>
     </div>
 </footer>
 
-<script src="script.js"></script>
+<script src="/js/script.js"></script>
 <script>lucide.createIcons();</script>
 </body>
 </html>
