@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // رابط النشر الخاص بـ Google Apps Script
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyS1LaTdS9ejR7vPOP-pNsOukEJiyUIA-WjS6sZZQydYUKdz1aYxINRfHKdsoWKYTTO5A/exec';
 
     const employeeDatabase = {
@@ -23,17 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    // العناصر
     const els = {
         branchRadios: document.querySelectorAll('input[name="branch"]'),
         employeeGrid: document.getElementById('employeeGrid'),
-        input: document.getElementById('cameraInput'),
+        // لا نحتاج لتخزين input هنا لأننا سنعيد إنشاءه
         preview: document.getElementById('imagePreview'),
         container: document.getElementById('imagePreviewContainer'),
         drop: document.getElementById('dropArea'),
         remove: document.getElementById('removeImage'),
         form: document.getElementById('cleaningReportForm'),
-        submitBtn: document.querySelector('button[type="submit"]'), // زر الإرسال
+        submitBtn: document.querySelector('button[type="submit"]'),
         modal: document.getElementById('customModal'),
         modalTitle: document.getElementById('modalTitle'),
         modalMsg: document.getElementById('modalMessage'),
@@ -42,15 +40,113 @@ document.addEventListener('DOMContentLoaded', () => {
         modalClose: document.getElementById('modalClose')
     };
 
-    // متغير لتخزين الصورة المضغوطة
     let compressedImageBase64 = null;
 
-    // تغيير الموظفين بناءً على الفرع
+    // ===================================================
+    // الحل الجذري: إعادة إنشاء input الكاميرا من الصفر
+    // هذا يحل مشكلتين: 1) عدم استجابة الزر بعد الحذف
+    //                  2) رفض الصورة بعد اختيارها في بعض المتصفحات
+    // ===================================================
+    function recreateCameraInput() {
+        // احذف الـ input القديم إذا وُجد
+        const oldInput = document.getElementById('cameraInput');
+        if (oldInput) oldInput.remove();
+
+        // أنشئ input جديد
+        const newInput = document.createElement('input');
+        newInput.type = 'file';
+        newInput.id = 'cameraInput';
+        newInput.accept = 'image/*';
+        newInput.setAttribute('capture', 'environment');
+        newInput.hidden = true;
+
+        // أضفه داخل الـ dropArea (label)
+        els.drop.appendChild(newInput);
+
+        // أضف الـ event listener للـ input الجديد
+        newInput.addEventListener('change', handleImageChange);
+
+        return newInput;
+    }
+
+    // دالة معالجة تغيير الصورة (منفصلة لإعادة الاستخدام)
+    async function handleImageChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        els.submitBtn.disabled = true;
+        els.submitBtn.style.opacity = "0.5";
+        
+        // أظهر حالة الضغط بدون تغيير innerHTML للـ label
+        const originalContent = els.drop.innerHTML;
+        els.drop.style.pointerEvents = 'none';
+        
+        try {
+            compressedImageBase64 = await compressImage(file, 800, 800, 0.7);
+            els.preview.src = compressedImageBase64;
+            els.container.classList.remove('hidden');
+            els.drop.classList.add('hidden');
+        } catch (error) {
+            console.error("فشل في معالجة الصورة:", error);
+            alert("فشل في معالجة الصورة، حاول مجدداً");
+            resetImageState();
+        } finally {
+            els.submitBtn.disabled = false;
+            els.submitBtn.style.opacity = "1";
+            els.drop.style.pointerEvents = 'auto';
+        }
+    }
+
+    // دالة إعادة تعيين واجهة الرفع
+    function resetImageState() {
+        compressedImageBase64 = null;
+
+        // أخفِ المعاينة وأظهر منطقة الرفع
+        els.container.classList.add('hidden');
+        els.drop.classList.remove('hidden');
+        els.drop.style.display = '';
+
+        // أعد إنشاء الـ input (الحل الجذري)
+        recreateCameraInput();
+
+        els.submitBtn.disabled = false;
+        els.submitBtn.style.opacity = "1";
+        els.submitBtn.style.cursor = "pointer";
+    }
+
+    // تهيئة الـ input عند بدء التشغيل
+    recreateCameraInput();
+
+    // ===================================================
+    // ربط زر حذف الصورة - بدون preventDefault لتجنب أي تعارض
+    // ===================================================
+    els.remove.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        resetImageState();
+    });
+
+    // ===================================================
+    // ربط الـ dropArea بفتح الكاميرا عند الضغط عليه
+    // ===================================================
+    els.drop.addEventListener('click', function(e) {
+        // تجنب التداخل مع label الافتراضي
+        if (e.target === els.drop || e.target.closest('#dropArea')) {
+            const currentInput = document.getElementById('cameraInput');
+            if (currentInput) {
+                currentInput.click();
+            }
+        }
+    });
+
+    // ===================================================
+    // اختيار موظفي الفرع
+    // ===================================================
     els.branchRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             const selectedBranch = e.target.value;
             const employees = branchEmployees[selectedBranch] || [];
-            els.employeeGrid.innerHTML = ''; 
+            els.employeeGrid.innerHTML = '';
             employees.forEach((emp, index) => {
                 const id = `emp_${index}`;
                 els.employeeGrid.innerHTML += `
@@ -65,11 +161,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         </label>
                     </div>`;
             });
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         });
     });
 
-    // وظيفة ضغط الصورة
+    // ===================================================
+    // ضغط الصورة
+    // ===================================================
     const compressImage = (file, maxWidth, maxHeight, quality) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -81,93 +179,49 @@ document.addEventListener('DOMContentLoaded', () => {
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-
                     if (width > height) {
-                        if (width > maxWidth) {
-                            height *= maxWidth / width;
-                            width = maxWidth;
-                        }
+                        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
                     } else {
-                        if (height > maxHeight) {
-                            width *= maxHeight / height;
-                            height = maxHeight;
-                        }
+                        if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
                     }
-
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     resolve(canvas.toDataURL('image/jpeg', quality));
                 };
-                img.onerror = (err) => reject(err);
+                img.onerror = reject;
             };
-            reader.onerror = (err) => reject(err);
+            reader.onerror = reject;
         });
     };
 
-    // معالجة اختيار الصورة
-    els.input.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // 1. تعطيل زر الإرسال وتغيير شكل منطقة الرفع
-            els.submitBtn.disabled = true;
-            els.submitBtn.style.opacity = "0.5";
-            els.drop.innerHTML = `<div class="loader-spinner"></div> <p>جاري ضغط الصورة... انتظر من فضلك</p>`;
-            
-            try {
-                // 2. ضغط الصورة (800px جودة 0.7)
-                compressedImageBase64 = await compressImage(file, 800, 800, 0.7);
-                
-                // 3. عرض المعاينة
-                els.preview.src = compressedImageBase64;
-                els.container.classList.remove('hidden');
-                els.drop.classList.add('hidden');
-
-                // 4. إعادة تفعيل الزر
-                els.submitBtn.disabled = false;
-                els.submitBtn.style.opacity = "1";
-            } catch (error) {
-                alert("خطأ في معالجة الصورة، يرجى المحاولة مرة أخرى.");
-                els.remove.click();
-            }
-        }
-    });
-
-    // إزالة الصورة
-    els.remove.onclick = () => {
-        els.input.value = "";
-        compressedImageBase64 = null;
-        els.container.classList.add('hidden');
-        els.drop.classList.remove('hidden');
-        els.drop.innerHTML = `<i data-lucide="camera"></i> <span>اضغط لتصوير المعدة</span>`;
-        els.submitBtn.disabled = false;
-        els.submitBtn.style.opacity = "1";
-        lucide.createIcons();
-    };
-
-    // إظهار المودال
+    // ===================================================
+    // Modal
+    // ===================================================
     const showModal = (type, title, message) => {
         els.modal.classList.remove('hidden');
         els.modalTitle.innerText = title;
         els.modalMsg.innerText = message;
         els.modalLoader.classList.add('hidden');
         els.modalClose.classList.add('hidden');
-        if (type === 'loading') { els.modalLoader.classList.remove('hidden'); }
-        else { 
+        if (type === 'loading') {
+            els.modalLoader.classList.remove('hidden');
+        } else {
             els.modalClose.classList.remove('hidden');
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            els.modalIcon.innerHTML = `<i data-lucide="${icon}" class="${type}-icon"></i>`;
-            lucide.createIcons();
+            const iconName = type === 'success' ? 'check-circle' : 'alert-circle';
+            els.modalIcon.innerHTML = `<i data-lucide="${iconName}" class="${type}-icon"></i>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     };
 
     els.modalClose.onclick = () => els.modal.classList.add('hidden');
 
+    // ===================================================
     // إرسال النموذج
+    // ===================================================
     els.form.addEventListener('submit', (e) => {
         e.preventDefault();
-
         const branch = document.querySelector('input[name="branch"]:checked');
         const empName = document.querySelector('input[name="employeeName"]:checked');
         const equipment = document.querySelector('input[name="equipment"]:checked');
@@ -199,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(() => {
             showModal('success', 'تم الإرسال', 'تم إرسال تقرير النظافة بنجاح.');
             els.form.reset();
-            els.remove.click();
+            resetImageState();
         })
         .catch(err => {
             showModal('error', 'خطأ في الشبكة', 'تعذر الإرسال: ' + err.message);
