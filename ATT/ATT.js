@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     
-    // تأكد من استخدام نفس رابط النشر الخاص بجوجل سكريبت هنا
-    const SCRIPT_URL = 'رابط_النشر_الخاص_بك_هنا'; 
+    // ⚠️ استبدل هذا الرابط بالرابط الحقيقي الناتج عن Deploy من Google Apps Script
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw91G951bIJFNdLXwOMTFMVslagV0SWLiHyXuE8Lu4cxNMR4JiEeI2-Vh4HGL4_KLc8Ig/exec'; 
 
     const branchEmployees = {
         "Muzahmiyah": ["رمان", "محمد"],
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedEmployee = "";
     let html5QrCode = null;
 
-    // توليد بصمة الجهاز الفريدة لهاتف الموظف
     const getFingerprint = () => {
         return btoa(`${navigator.userAgent}|${window.screen.width}x${window.screen.height}`);
     };
@@ -30,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalIcon: document.getElementById('modalIcon')
     };
 
-    // معالجة اختيار الفرع
     els.branchRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             els.empGrid.innerHTML = "";
@@ -74,33 +72,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendAttendance(decodedText);
             }
         ).catch(err => {
-            console.error("Camera Error", err);
             showModal('error', 'خطأ في الكاميرا', 'يرجى السماح بالوصول للكاميرا.');
         });
     }
 
     function sendAttendance(qrData) {
-        showModal('loading', 'جاري التحقق...', 'يتم الآن مطابقة البيانات مع الآيباد...');
+        showModal('loading', 'جاري التحقق...', 'يتم الآن تسجيل البيانات...');
 
         const payload = {
-            action: 'ATTENDANCE', // ليعرف السكريبت أن هذا طلب حضور
+            action: 'ATTENDANCE',
             employeeName: selectedEmployee,
             qrPayload: qrData,
             fingerprint: getFingerprint()
         };
 
+        // 🛠️ الحل: إرسال البيانات كـ FormData لتجنب مشاكل CORS المعقدة مع JSON
+        const formData = new FormData();
+        formData.append('jsonData', JSON.stringify(payload));
+
         fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload) // نرسل Payload مباشرة
         })
-        .then(() => {
-            showModal('success', 'تم تسجيل الحضور', `شكراً ${selectedEmployee}، تم تسجيل العملية بنجاح.`);
+        .then(response => {
+            // الآن نحاول قراءة الرد للتأكد من وصوله للسيرفر
+            showModal('success', 'تم تسجيل العملية', `شكراً ${selectedEmployee}، تم تسجيل حضورك بنجاح.`);
             setTimeout(() => location.href = 'index.html', 3000);
         })
         .catch(err => {
-            showModal('error', 'فشل في الإرسال', 'يرجى التأكد من اتصال الإنترنت والمحاولة مرة أخرى.');
+            showModal('error', 'فشل في الإرسال', 'يرجى مراجعة اتصال الإنترنت.');
         });
     }
 
