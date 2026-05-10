@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzpbU--HxS9nZwH5YOEzlpm6CNLrxbspOY0sULaxaQMY5jtmfMg6A2H0h9K5YXh4H8yOg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwA0QuQCcugT9F1KVTCG4pY5DbWiU9WhdK5uwBmt3nfAx5zv_y-mXao2SNgc4Nwj4L-Iw/exec';
 
     const employeeDatabase = {
         "1000": "بلال الخواجة",
