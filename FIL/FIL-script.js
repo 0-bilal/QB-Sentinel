@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwO8PW0O4kiId4lKjsJyMe-4Axs_lTvhgBYvrlh3GkOBRebEmZaJL0UqvvGsE2dX--C_A/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA0aXKmxBTze3nF_q0ZprBQNaGHgSN1AWZ4ZnM3J5e14DCEEOPHWbN2mk1BlAKfx3jUQ/exec';
 
     const employeeDatabase = {
         "1000": "بلال الخواجة",
@@ -355,22 +355,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار...');
-
-        let inspected = [], na = [], damaged = [];
-        document.querySelectorAll('.fruit-row').forEach(row => {
-            const nameAr    = row.getAttribute('data-fruit-name');
-            const isNA      = row.querySelector('[data-type="na"]').checked;
-            const isDamaged = row.querySelector('[data-type="damaged"]').checked;
-            const isInspected = row.querySelector('[data-type="inspected"]').checked;
-
-            if (isNA) na.push(nameAr);
-            if (isInspected && !isDamaged) inspected.push(nameAr);
-            if (isDamaged) {
-                const weight = row.querySelector('.damage-qty').value;
-                damaged.push(`${nameAr} (${weight}g)`);
-            }
-        });
+        // ... (داخل els.form.addEventListener)
+        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم رفع البيانات والصور...');
 
         const payload = {
             reportType:    "فحص جودة الفواكه",
@@ -383,17 +369,32 @@ document.addEventListener('DOMContentLoaded', () => {
             image:         compressedImageBase64
         };
 
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-        })
-        .then(() => {
-            showModal('success', 'تم الإرسال', 'تم إرسال تقرير فحص الفاكهة بنجاح.');
-        })
-        .catch(() => {
-            showModal('error', 'فشل الإرسال', 'حدث خطأ في الشبكة.');
-        });
+        // الحل لكسر مشكلة CORS والنجاح الوهمي
+        const formData = new URLSearchParams();
+        formData.append('payload', JSON.stringify(payload));
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData, // إرسال كبيانات نموذج
+                mode: 'cors'
+            });
+
+            const result = await response.json();
+
+            if (result.result === 'success') {
+                showModal('success', 'تم الإرسال', `تم إرسال تقرير فحص الفاكهة بنجاح برقم: ${result.id}`);
+                // الدالة موجودة مسبقاً في ملفك لصفر النموذج
+                resetFullForm(); 
+            } else {
+                throw new Error(result.message || 'فشل السيرفر في معالجة الطلب');
+            }
+        } catch (error) {
+            console.error("Submission Error:", error);
+            showModal('error', 'فشل الإرسال', 'حدث خطأ في الاتصال بالسيرفر. يرجى التأكد من جودة الإنترنت وحاول مجدداً.');
+        } finally {
+            els.submitBtn.disabled = false;
+            els.submitBtn.style.opacity = "1";
+        }
     });
 });
