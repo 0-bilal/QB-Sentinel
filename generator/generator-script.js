@@ -1,98 +1,59 @@
-document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons();
-    
-    // --- الإعدادات ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9D0z8pcRAIPACEIB0YE_3st9qjSPc_ZQPSMFYyqtkQWtHSTzcB5lqDZJDg6SkfW8RdA/exec'; 
-    let currentMode = 'IN'; 
-    let deviceId = localStorage.getItem('QB_DEVICE_ID');
-    
-    const qrContainer = document.getElementById("qrContainer");
-    let qrGenerator = new QRCode(qrContainer, {
-        width: 256,
-        height: 256,
-        correctLevel: QRCode.CorrectLevel.H
-    });
+let deviceId = localStorage.getItem('QB_DEVICE_ID') || "";
+let branchName = localStorage.getItem('QB_BRANCH_NAME') || "";
+let branchCode = localStorage.getItem('QB_BRANCH_CODE') || "";
+let currentMode = 'IN';
 
-    // --- التحقق من تسجيل الجهاز ---
-    if (!deviceId) {
-        document.getElementById('setupScreen').classList.remove('hidden');
-    } else {
-        document.getElementById('deviceDisplay').innerText = `جهاز: ${deviceId}`;
-        startSystem();
-    }
-
-    // --- وظيفة تسجيل الجهاز لأول مرة ---
-    document.getElementById('saveSetupBtn').onclick = () => {
-        const input = document.getElementById('deviceIdInput').value.trim();
-        if (input) {
-            deviceId = input;
-            localStorage.setItem('QB_DEVICE_ID', deviceId);
-            
-            // إرسال بيانات البصمة الأمنية للآيباد للتسجيل في الشيت
-            const registrationData = {
-                action: 'REGISTER_DEVICE',
-                deviceId: deviceId,
-                userAgent: navigator.userAgent,
-                screenRes: `${window.screen.width}x${window.screen.height}`,
-                platform: navigator.platform
-            };
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(registrationData)
-            }).then(() => {
-                location.reload();
-            });
-        }
-    };
-
-    function startSystem() {
-        updateQR();
-        setInterval(updateQR, 30000); // تحديث الكود كل 30 ثانية للأمان
-        setInterval(updateTime, 1000);
-    }
-
-    function updateQR() {
-        const timestamp = Date.now();
-        // تشفير: معرف الجهاز | العملية | الوقت
-        const rawData = `${deviceId}|${currentMode}|${timestamp}`;
-        const encodedData = btoa(rawData); 
-        
-        qrGenerator.clear();
-        qrGenerator.makeCode(encodedData);
-        
-        // تحديث شريط الوقت المرئي
-        const bar = document.getElementById('timerBar');
-        if (bar) {
-            bar.style.transition = 'none';
-            bar.style.width = '100%';
-            setTimeout(() => {
-                bar.style.transition = 'width 30s linear';
-                bar.style.width = '0%';
-            }, 100);
-        }
-    }
-
-    function updateTime() {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
-        document.getElementById('timestamp').innerText = timeStr;
-    }
-
-    // --- التحكم في الأزرار ---
-    document.getElementById('btnIn').onclick = () => {
-        currentMode = 'IN';
-        document.getElementById('processTitle').innerText = 'تسجيل حضور';
-        document.getElementById('processTitle').style.color = '#2e7d32';
-        updateQR();
-    };
-
-    document.getElementById('btnOut').onclick = () => {
-        currentMode = 'OUT';
-        document.getElementById('processTitle').innerText = 'تسجيل انصراف';
-        document.getElementById('processTitle').style.color = '#c62828';
-        updateQR();
-    };
+const qrGenerator = new QRCode(document.getElementById("qrContainer"), {
+    width: 250,
+    height: 250
 });
+
+async function getDeviceIP() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+    } catch (e) { return "0.0.0.0"; }
+}
+
+// إعداد الجهاز (تعديل الـ HTML مطلوب ليشمل الحقول الجديدة)
+document.getElementById('saveSetupBtn')?.addEventListener('click', async () => {
+    const idInput = document.getElementById('deviceIdInput').value;
+    const nameInput = document.getElementById('branchNameInput').value;
+    const codeInput = document.getElementById('branchCodeInput').value;
+
+    if (!idInput || !nameInput || !codeInput) return alert("أكمل البيانات!");
+
+    const ip = await getDeviceIP();
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: new URLSearchParams({
+            action: 'REGISTER_DEVICE',
+            deviceId: idInput,
+            branchName: nameInput,
+            branchCode: codeInput,
+            ipAddress: ip
+        })
+    }).then(() => {
+        localStorage.setItem('QB_DEVICE_ID', idInput);
+        localStorage.setItem('QB_BRANCH_NAME', nameInput);
+        localStorage.setItem('QB_BRANCH_CODE', codeInput);
+        location.reload();
+    });
+});
+
+function updateQR() {
+    if (!deviceId || !branchCode) return;
+    const timestamp = Date.now();
+    // البيانات المشفرة تشمل اسم الفرع وكوده
+    const rawData = `${deviceId}|${branchName}|${currentMode}|${timestamp}|${branchCode}`;
+    const encodedData = btoa(unescape(encodeURIComponent(rawData)));
+    
+    qrGenerator.clear();
+    qrGenerator.makeCode(encodedData);
+    document.getElementById('timestamp').innerText = new Date().toLocaleTimeString('en-US');
+}
+
+setInterval(updateQR, 15000);
