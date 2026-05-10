@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     
     // ⚠️ استبدل هذا الرابط بالرابط الحقيقي الناتج عن Deploy من Google Apps Script
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw91G951bIJFNdLXwOMTFMVslagV0SWLiHyXuE8Lu4cxNMR4JiEeI2-Vh4HGL4_KLc8Ig/exec'; 
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1OoKsvsdCITKczWdlN4pS-Vm-8gjct5DEcJp80UVzi3vxBEHEqPP8qJJ7bg_lGn5lwA/exec'; 
 
     const branchEmployees = {
         "Muzahmiyah": ["رمان", "محمد"],
@@ -75,9 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showModal('error', 'خطأ في الكاميرا', 'يرجى السماح بالوصول للكاميرا.');
         });
     }
-
-    function sendAttendance(qrData) {
-    showModal('loading', 'جاري التحقق...', 'يتم الآن تسجيل البيانات...');
+function sendAttendance(qrData) {
+    showModal('loading', 'جاري التحقق...', 'يتم تسجيل حضورك...');
 
     const payload = {
         action: 'ATTENDANCE',
@@ -88,17 +87,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetch(SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', // ضروري لتجاوز قيود المتصفح
-        headers: { 'Content-Type': 'text/plain' }, // إرسالها كنص خام ليقبلها السكريبت
+        mode: 'no-cors', 
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
     })
     .then(() => {
-        // بما أننا نستخدم no-cors، سنفترض النجاح هنا ونوجه المستخدم
-        showModal('success', 'تم الإرسال', `شكراً ${selectedEmployee}، تم إرسال طلبك بنجاح.`);
+        // بسبب no-cors، المتصفح لا يقرأ رد السيرفر، لذا نظهر رسالة نجاح عامة
+        showModal('success', 'تم الإرسال', `شكراً ${selectedEmployee}، تم إرسال الطلب.`);
         setTimeout(() => location.href = 'index.html', 3000);
     })
     .catch(err => {
-        showModal('error', 'فشل في الإرسال', 'يرجى مراجعة اتصال الإنترنت.');
+        showModal('error', 'خطأ', 'فشل الإرسال، تحقق من الإنترنت.');
     });
 }
 
