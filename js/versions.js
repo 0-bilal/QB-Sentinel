@@ -1,7 +1,7 @@
 const APP_VERSIONS = {
     "ECL": "v1.3.8",
     "FIL": "v1.3.8",
-    "CPV": "v1.2.1",
+    "CPV": "v1.3.1",
     "EDR": "BETA",
     "PRR": "BETA",
     "PAL": "BETA",
