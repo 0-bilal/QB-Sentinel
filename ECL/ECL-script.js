@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwA0QuQCcugT9F1KVTCG4pY5DbWiU9WhdK5uwBmt3nfAx5zv_y-mXao2SNgc4Nwj4L-Iw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqxwJ5CBwjPSX-8CZSLVOSz5k7eOyd95mPOHGXXWo_Q_Gb7PgJUVizv_vTqIVqJ7CcIA/exec';
 
     const employeeDatabase = {
         "1000": "بلال الخواجة",
@@ -208,7 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================================
     // إرسال النموذج
     // ===================================================
-    els.form.addEventListener('submit', (e) => {
+    // ===================================================
+    // إرسال النموذج (نسخة الإرسال الآمن)
+    // ===================================================
+    els.form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const branch = document.querySelector('input[name="branch"]:checked');
         const empName = document.querySelector('input[name="employeeName"]:checked');
@@ -220,11 +223,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار...');
+        const employeeName = employeeDatabase[empId];
+        if (!employeeName) {
+            showModal('error', 'خطأ في التحقق', 'رقم الموظف المرسل غير مسجل.');
+            return;
+        }
+
+        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم تسجيل التقرير...');
+        els.submitBtn.disabled = true;
 
         const payload = {
             branch: branch.value === 'Muzahmiyah' ? 'المزاحمية' : 'الدوادمي',
-            senderName: employeeDatabase[empId] || 'موظف رقم: ' + empId,
+            senderName: employeeName,
             cleanerName: empName.value,
             equipmentAr: equipment.parentElement.querySelector('span').innerText,
             equipmentEn: equipment.parentElement.querySelector('small').innerText,
@@ -232,19 +242,32 @@ document.addEventListener('DOMContentLoaded', () => {
             image: compressedImageBase64
         };
 
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-        })
-        .then(() => {
-            showModal('success', 'تم الإرسال', 'تم إرسال تقرير النظافة بنجاح.');
-            els.form.reset();
-            resetImageState();
-        })
-        .catch(err => {
-            showModal('error', 'خطأ في الشبكة', 'تعذر الإرسال: ' + err.message);
-        });
+        // ✅ تحويل البيانات لتجاوز CORS وضمان قراءة الرد
+        const formData = new URLSearchParams();
+        formData.append('payload', JSON.stringify(payload));
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'cors'
+            });
+
+            const result = await response.json();
+
+            if (result.result === 'success') {
+                showModal('success', 'تم الإرسال', `تم إرسال تقرير النظافة بنجاح برقم: ${result.id}`);
+                els.form.reset();
+                resetImageState();
+            } else {
+                throw new Error(result.message || 'فشل في معالجة البيانات');
+            }
+        } catch (error) {
+            console.error("Submission Error:", error);
+            showModal('error', 'خطأ في الإرسال', 'تعذر الوصول للسيرفر. تأكد من الإنترنت وحاول مجدداً.');
+        } finally {
+            els.submitBtn.disabled = false;
+            els.submitBtn.style.opacity = "1";
+        }
     });
 });
