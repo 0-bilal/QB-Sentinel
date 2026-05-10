@@ -1,11 +1,11 @@
 const APP_VERSIONS = {
-    "ECL": "v1.3.8",
-    "FIL": "v1.3.9",
-    "CPV": "v1.3.2",
+    "ECL": "v1.3.9",
+    "FIL": "v1.3.10",
+    "CPV": "v1.3.3",
     "EDR": "BETA",
     "PRR": "BETA",
     "PAL": "BETA",
-    "GLOBAL": "v1.13.10" 
+    "GLOBAL": "v1.13.11" 
     //  2026/05/10 date
 };
 
