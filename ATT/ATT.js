@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     
     // ⚠️ استبدل هذا الرابط بالرابط الحقيقي الناتج عن Deploy من Google Apps Script
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1OoKsvsdCITKczWdlN4pS-Vm-8gjct5DEcJp80UVzi3vxBEHEqPP8qJJ7bg_lGn5lwA/exec'; 
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9D0z8pcRAIPACEIB0YE_3st9qjSPc_ZQPSMFYyqtkQWtHSTzcB5lqDZJDg6SkfW8RdA/exec'; 
 
     const branchEmployees = {
         "Muzahmiyah": ["رمان", "محمد"],
@@ -78,26 +78,35 @@ document.addEventListener('DOMContentLoaded', () => {
 function sendAttendance(qrData) {
     showModal('loading', 'جاري التحقق...', 'يتم تسجيل حضورك...');
 
-    const payload = {
-        action: 'ATTENDANCE',
-        employeeName: selectedEmployee,
-        qrPayload: qrData,
-        fingerprint: getFingerprint()
-    };
+    // 1. تحويل البيانات إلى تنسيق Form لضمان توافقها مع متصفحات الجوال
+    const formData = new URLSearchParams();
+    formData.append('action', 'ATTENDANCE');
+    formData.append('employeeName', selectedEmployee);
+    formData.append('qrPayload', qrData);
+    formData.append('fingerprint', getFingerprint());
 
+    // 2. إرسال الطلب
     fetch(SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', 
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
+        mode: 'no-cors', // ضروري لتجنب مشاكل الـ CORS في Google Apps Script
+        cache: 'no-cache',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
     })
     .then(() => {
-        // بسبب no-cors، المتصفح لا يقرأ رد السيرفر، لذا نظهر رسالة نجاح عامة
-        showModal('success', 'تم الإرسال', `شكراً ${selectedEmployee}، تم إرسال الطلب.`);
-        setTimeout(() => location.href = 'index.html', 3000);
+        // بما أن mode هو no-cors، سنفترض النجاح إذا لم يحدث Error في الإرسال
+        showModal('success', 'تم الإرسال', `شكراً ${selectedEmployee}، تم إرسال الطلب بنجاح.`);
+        
+        // إعادة التوجيه للصفحة الرئيسية بعد 3 ثوانٍ
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 3000);
     })
     .catch(err => {
-        showModal('error', 'خطأ', 'فشل الإرسال، تحقق من الإنترنت.');
+        console.error('Fetch Error:', err);
+        showModal('error', 'خطأ في الاتصال', 'فشل الإرسال، يرجى التأكد من تشغيل بيانات الهاتف أو الواي فاي.');
     });
 }
 
