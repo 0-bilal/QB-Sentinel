@@ -1,6 +1,6 @@
     document.addEventListener('DOMContentLoaded', () => {
     // الرابط الخاص بجوجل سكريبت (تأكد من تحديثه بعد النشر)
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVnvzmLQPvFYS3fS2jZy5tANVhcGbLo9HDpkjnaqNjmZu_VIsJO07Df1G2Un7Plzuu5w/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMlxLmbWimGkh55-naYPdeT4IGnKcsWXQB7U0XRwhtX25HUvKCv2sHq70jes3f2JVt/exec';
 
     // قاعدة بيانات الموظفين
     const employeeDatabase = {
@@ -85,31 +85,30 @@ els.form.addEventListener('submit', async (e) => {
     };
 
     try {
-        /* التعديل الجوهري هنا:
-           - أرسلنا البيانات كـ text/plain لتجنب مشاكل CORS المعقدة.
-           - لم نستخدم no-cors لنتمكن من قراءة الرد.
-        */
+        // تحويل البيانات إلى تنسيق يفهمه جوجل سكريبت بسهولة ويتجاوز CORS
+        const formData = new URLSearchParams();
+        formData.append('payload', JSON.stringify(payload));
+
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify(payload)
+            body: formData, // إرسال كـ Form Data بدلاً من JSON خام
+            mode: 'cors'    // تفعيل وضع الكورس مع السماح بالرد
         });
 
-        // قراءة الرد وتحويله إلى JSON
+        // جوجل سكريبت يقوم بعمل إعادة توجيه (Redirect)
+        // هذا السطر يضمن استلام الرد النهائي
         const result = await response.json();
 
         if (result.result === 'success') {
-            // نجاح حقيقي من طرف السيرفر
-            showModal('success', 'تم الإرسال بنجاح', `تم تسجيل السند برقم: ${result.id} وإرسال الإيميل.`);
+            showModal('success', 'تم الإرسال بنجاح', `تم تسجيل السند برقم: ${result.id}`);
             els.form.reset();
         } else {
-            // السيرفر استلم الطلب ولكن حدث خطأ داخلي (مثل فشل الكتابة في الشيت)
-            throw new Error(result.message || 'خطأ غير معروف في السيرفر');
+            throw new Error(result.message);
         }
 
     } catch (error) {
-        // فشل في الاتصال بالشبكة، أو خطأ في الرابط، أو فشل السيرفر في الرد
         console.error("Submission Error:", error);
-        showModal('error', 'فشل في الإرسال', 'تعذر الوصول للسيرفر. يرجى التأكد من الإنترنت والمحاولة لاحقاً.');
+        showModal('error', 'فشل في الإرسال', 'حدث خطأ أثناء التواصل مع السيرفر. تأكد من إعدادات النشر.');
     } finally {
         els.submitBtn.disabled = false;
         els.submitBtn.style.opacity = "1";
