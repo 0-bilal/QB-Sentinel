@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyS1LaTdS9ejR7vPOP-pNsOukEJiyUIA-WjS6sZZQydYUKdz1aYxINRfHKdsoWKYTTO5A/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzpbU--HxS9nZwH5YOEzlpm6CNLrxbspOY0sULaxaQMY5jtmfMg6A2H0h9K5YXh4H8yOg/exec';
 
     const employeeDatabase = {
-        "1000": "بلال",
+        "1000": "بلال الخواجة",
         "1101": "رمان",
         "1311": "محمد",
         "1551": "شاهين",
