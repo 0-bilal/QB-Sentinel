@@ -1,6 +1,6 @@
     document.addEventListener('DOMContentLoaded', () => {
     // الرابط الخاص بجوجل سكريبت (تأكد من تحديثه بعد النشر)
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVnvzmLQPvFYS3fS2jZy5tANVhcGbLo9HDpkjnaqNjmZu_VIsJO07Df1G2Un7Plzuu5w/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxo6HvZbsqb-Qc4HQPRQpDdC7PjqWPgHwT8_uFN0Jn0aPvbNpQL6O8d5vg0mskfXQVALg/exec';
 
     // قاعدة بيانات الموظفين
     const employeeDatabase = {
@@ -46,64 +46,73 @@
     els.modalClose.onclick = () => els.modal.classList.add('hidden');
 
     // معالجة إرسال النموذج
-    els.form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    // معالجة إرسال النموذج
+els.form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-        // جلب القيم من الحقول
-        const branchRadio = document.querySelector('input[name="branch"]:checked');
-        const empId = document.getElementById('employeeId').value;
-        const reason = document.getElementById('paymentReason').value;
-        const amount = document.getElementById('amount').value;
-        const beneficiary = document.getElementById('beneficiaryPhone').value;
+    // جلب القيم من الحقول
+    const branchRadio = document.querySelector('input[name="branch"]:checked');
+    const empId = document.getElementById('employeeId').value;
+    const reason = document.getElementById('paymentReason').value;
+    const amount = document.getElementById('amount').value;
+    const beneficiary = document.getElementById('beneficiaryPhone').value;
 
-        // 1. التحقق من الحقول الإلزامية
-        if (!branchRadio || !empId || !reason || !amount) {
-            showModal('error', 'بيانات ناقصة', 'يرجى إكمال جميع الحقول المطلوبة.');
-            return;
-        }
+    // 1. التحقق من الحقول الإلزامية
+    if (!branchRadio || !empId || !reason || !amount) {
+        showModal('error', 'بيانات ناقصة', 'يرجى إكمال جميع الحقول المطلوبة.');
+        return;
+    }
 
-        // 2. التحقق من اسم الموظف عبر الرقم الوظيفي
-        const employeeName = employeeDatabase[empId];
-        if (!employeeName) {
-            showModal('error', 'خطأ في التحقق', 'رقم الموظف المدخل غير مسجل في النظام.');
-            return;
-        }
+    // 2. التحقق من اسم الموظف
+    const employeeName = employeeDatabase[empId];
+    if (!employeeName) {
+        showModal('error', 'خطأ في التحقق', 'رقم الموظف المدخل غير مسجل في النظام.');
+        return;
+    }
 
-        // إظهار حالة التحميل
-        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم تسجيل سند الصرف...');
-        els.submitBtn.disabled = true;
-        els.submitBtn.style.opacity = "0.7";
+    // إظهار حالة التحميل
+    showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم تسجيل سند الصرف...');
+    els.submitBtn.disabled = true;
+    els.submitBtn.style.opacity = "0.7";
 
-        // 3. تجهيز البيانات (الأرقام والتواريخ يتم التعامل معها في السيرفر لضمان اللغة الإنجليزية)
-        const payload = {
-            branch: branchRadio.value === 'Muzahmiyah' ? 'المزاحمية' : 'الدوادمي',
-            employeeName: employeeName,
-            reason: reason,
-            amount: amount,
-            beneficiary: beneficiary || "None",
-            type: "PV"
-        };
+    const payload = {
+        branch: branchRadio.value === 'Muzahmiyah' ? 'المزاحمية' : 'الدوادمي',
+        employeeName: employeeName,
+        reason: reason,
+        amount: amount,
+        beneficiary: beneficiary || "None",
+        type: "PV"
+    };
 
-        try {
-            // الإرسال إلى Google Apps Script
-            // ملاحظة: نستخدم mode: 'no-cors' لتجنب مشاكل الـ CORS في المتصفح
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(payload)
-            });
+    try {
+        /* التعديل الجوهري هنا:
+           - أرسلنا البيانات كـ text/plain لتجنب مشاكل CORS المعقدة.
+           - لم نستخدم no-cors لنتمكن من قراءة الرد.
+        */
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
 
-            // نجاح العملية
-            showModal('success', 'تم الإرسال بنجاح', 'تم تسجيل سند الصرف .');
+        // قراءة الرد وتحويله إلى JSON
+        const result = await response.json();
+
+        if (result.result === 'success') {
+            // نجاح حقيقي من طرف السيرفر
+            showModal('success', 'تم الإرسال بنجاح', `تم تسجيل السند برقم: ${result.id} وإرسال الإيميل.`);
             els.form.reset();
-            
-        } catch (error) {
-            console.error("Submission Error:", error);
-            showModal('error', 'فشل في الإرسال', 'حدث خطأ أثناء الاتصال بالسيرفر. يرجى المحاولة لاحقاً.');
-        } finally {
-            els.submitBtn.disabled = false;
-            els.submitBtn.style.opacity = "1";
+        } else {
+            // السيرفر استلم الطلب ولكن حدث خطأ داخلي (مثل فشل الكتابة في الشيت)
+            throw new Error(result.message || 'خطأ غير معروف في السيرفر');
         }
-    });
+
+    } catch (error) {
+        // فشل في الاتصال بالشبكة، أو خطأ في الرابط، أو فشل السيرفر في الرد
+        console.error("Submission Error:", error);
+        showModal('error', 'فشل في الإرسال', 'تعذر الوصول للسيرفر. يرجى التأكد من الإنترنت والمحاولة لاحقاً.');
+    } finally {
+        els.submitBtn.disabled = false;
+        els.submitBtn.style.opacity = "1";
+    }
+});
 });
