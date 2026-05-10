@@ -313,88 +313,108 @@ document.addEventListener('DOMContentLoaded', () => {
     // إرسال النموذج
     // ===================================================
     els.form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        const empId  = document.getElementById('employeeId').value;
-        const branch = document.querySelector('input[name="branch"]:checked');
+    const empId  = document.getElementById('employeeId').value;
+    const branch = document.querySelector('input[name="branch"]:checked');
 
-        let missingSelection = [];
-        let missingWeight    = [];
+    let missingSelection = [];
+    let missingWeight    = [];
+    
+    // تعريف المصفوفات التي كانت مفقودة وتسبب الخطأ
+    let inspected = [];
+    let na = [];
+    let damaged = [];
 
-        document.querySelectorAll('.fruit-row').forEach(row => {
-            const nameAr      = row.getAttribute('data-fruit-name');
-            const isChecked   = row.querySelector('.status-check:checked');
-            const isDamaged   = row.querySelector('[data-type="damaged"]').checked;
-            const weightInput = row.querySelector('.damage-qty');
+    // تجميع البيانات من الأسطر
+    document.querySelectorAll('.fruit-row').forEach(row => {
+        const nameAr      = row.getAttribute('data-fruit-name');
+        const isChecked   = row.querySelector('.status-check:checked');
+        const isNA        = row.querySelector('[data-type="na"]').checked;
+        const isDamaged   = row.querySelector('[data-type="damaged"]').checked;
+        const isInspected = row.querySelector('[data-type="inspected"]').checked;
+        const weightInput = row.querySelector('.damage-qty');
 
-            if (!isChecked) {
-                row.classList.add('row-error');
-                missingSelection.push(nameAr);
-            } else if (isDamaged && (!weightInput.value || parseFloat(weightInput.value) <= 0)) {
-                row.classList.add('row-error');
-                missingWeight.push(nameAr);
+        if (!isChecked) {
+            row.classList.add('row-error');
+            missingSelection.push(nameAr);
+        } else {
+            // ملء المصفوفات بالبيانات
+            if (isNA) na.push(nameAr);
+            if (isInspected && !isDamaged) inspected.push(nameAr);
+            if (isDamaged) {
+                if (!weightInput.value || parseFloat(weightInput.value) <= 0) {
+                    row.classList.add('row-error');
+                    missingWeight.push(nameAr);
+                } else {
+                    damaged.push(`${nameAr} (${weightInput.value}g)`);
+                    inspected.push(nameAr); // التالف يعتبر تم فحصه أيضاً
+                }
             }
+        }
+    });
+
+    // التحقق من صحة البيانات قبل الإرسال
+    if (missingSelection.length > 0) {
+        showModal('error', 'تقرير غير مكتمل', `يرجى فحص جميع الأصناف. لم يتم فحص: ${missingSelection.slice(0, 3).join('، ')}`);
+        return;
+    }
+    if (missingWeight.length > 0) {
+        showModal('error', 'وزن التالف مفقود', `يرجى إدخال وزن التالف لـ: ${missingWeight.slice(0, 3).join('، ')}`);
+        return;
+    }
+    if (!branch || !employeeDatabase[empId]) {
+        showModal('error', 'بيانات ناقصة', 'يرجى اختيار الفرع والتأكد من كود الموظف.');
+        return;
+    }
+
+    const anyDamaged = damaged.length > 0;
+    if (anyDamaged && !compressedImageBase64) {
+        showModal('error', 'صورة مفقودة', 'يرجى تصوير الفواكه التالفة قبل الإرسال.');
+        return;
+    }
+
+    // بدء عملية الإرسال الحقيقية
+    showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم رفع البيانات والصور...');
+    els.submitBtn.disabled = true;
+
+    const payload = {
+        reportType:    "فحص جودة الفواكه",
+        branch:        branch.value === "Muzahmiyah" ? "المزاحمية" : "الدوادمي",
+        employeeId:    empId,
+        employeeName:  employeeDatabase[empId],
+        inspectedList: inspected.join(" - "),
+        naList:        na.join(" - "),
+        damagedList:   damaged.join(" - "),
+        image:         compressedImageBase64
+    };
+
+    // استخدام URLSearchParams لتجاوز CORS وقراءة الرد
+    const formData = new URLSearchParams();
+    formData.append('payload', JSON.stringify(payload));
+
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: formData,
+            mode: 'cors'
         });
 
-        if (missingSelection.length > 0) {
-            showModal('error', 'تقرير غير مكتمل', `يرجى فحص جميع الأصناف. لم يتم فحص: ${missingSelection.slice(0, 3).join('، ')}`);
-            return;
+        const result = await response.json();
+
+        if (result.result === 'success') {
+            showModal('success', 'تم الإرسال', `تم إرسال تقرير فحص الفاكهة بنجاح برقم: ${result.id}`);
+            resetFullForm(); 
+        } else {
+            throw new Error(result.message || 'فشل السيرفر في معالجة الطلب');
         }
-        if (missingWeight.length > 0) {
-            showModal('error', 'وزن التالف مفقود', `يرجى إدخال وزن التالف لـ: ${missingWeight.slice(0, 3).join('، ')}`);
-            return;
-        }
-        if (!branch || !employeeDatabase[empId]) {
-            showModal('error', 'بيانات ناقصة', 'يرجى اختيار الفرع والتأكد من كود الموظف.');
-            return;
-        }
+    } catch (error) {
+        console.error("Submission Error:", error);
+        showModal('error', 'فشل الإرسال', 'حدث خطأ في الاتصال بالسيرفر. يرجى التأكد من جودة الإنترنت وحاول مجدداً.');
+    } finally {
+        els.submitBtn.disabled = false;
+        els.submitBtn.style.opacity = "1";
+    }
 
-        const anyDamaged = document.querySelectorAll('.status-check[data-type="damaged"]:checked').length > 0;
-        if (anyDamaged && !compressedImageBase64) {
-            showModal('error', 'صورة مفقودة', 'يرجى تصوير الفواكه التالفة قبل الإرسال.');
-            return;
-        }
-
-        // ... (داخل els.form.addEventListener)
-        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم رفع البيانات والصور...');
-
-        const payload = {
-            reportType:    "فحص جودة الفواكه",
-            branch:        branch.value === "Muzahmiyah" ? "المزاحمية" : "الدوادمي",
-            employeeId:    empId,
-            employeeName:  employeeDatabase[empId],
-            inspectedList: inspected.join(" - "),
-            naList:        na.join(" - "),
-            damagedList:   damaged.join(" - "),
-            image:         compressedImageBase64
-        };
-
-        // الحل لكسر مشكلة CORS والنجاح الوهمي
-        const formData = new URLSearchParams();
-        formData.append('payload', JSON.stringify(payload));
-
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData, // إرسال كبيانات نموذج
-                mode: 'cors'
-            });
-
-            const result = await response.json();
-
-            if (result.result === 'success') {
-                showModal('success', 'تم الإرسال', `تم إرسال تقرير فحص الفاكهة بنجاح برقم: ${result.id}`);
-                // الدالة موجودة مسبقاً في ملفك لصفر النموذج
-                resetFullForm(); 
-            } else {
-                throw new Error(result.message || 'فشل السيرفر في معالجة الطلب');
-            }
-        } catch (error) {
-            console.error("Submission Error:", error);
-            showModal('error', 'فشل الإرسال', 'حدث خطأ في الاتصال بالسيرفر. يرجى التأكد من جودة الإنترنت وحاول مجدداً.');
-        } finally {
-            els.submitBtn.disabled = false;
-            els.submitBtn.style.opacity = "1";
-        }
     });
 });
