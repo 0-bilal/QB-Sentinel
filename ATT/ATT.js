@@ -77,32 +77,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function sendAttendance(qrData) {
-        showModal('loading', 'جاري التحقق...', 'يتم الآن تسجيل البيانات...');
+    showModal('loading', 'جاري التحقق...', 'يتم الآن تسجيل البيانات...');
 
-        const payload = {
-            action: 'ATTENDANCE',
-            employeeName: selectedEmployee,
-            qrPayload: qrData,
-            fingerprint: getFingerprint()
-        };
+    const payload = {
+        action: 'ATTENDANCE',
+        employeeName: selectedEmployee,
+        qrPayload: qrData,
+        fingerprint: getFingerprint()
+    };
 
-        // 🛠️ الحل: إرسال البيانات كـ FormData لتجنب مشاكل CORS المعقدة مع JSON
-        const formData = new FormData();
-        formData.append('jsonData', JSON.stringify(payload));
-
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload) // نرسل Payload مباشرة
-        })
-        .then(response => {
-            // الآن نحاول قراءة الرد للتأكد من وصوله للسيرفر
-            showModal('success', 'تم تسجيل العملية', `شكراً ${selectedEmployee}، تم تسجيل حضورك بنجاح.`);
-            setTimeout(() => location.href = 'index.html', 3000);
-        })
-        .catch(err => {
-            showModal('error', 'فشل في الإرسال', 'يرجى مراجعة اتصال الإنترنت.');
-        });
-    }
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // ضروري لتجاوز قيود المتصفح
+        headers: { 'Content-Type': 'text/plain' }, // إرسالها كنص خام ليقبلها السكريبت
+        body: JSON.stringify(payload)
+    })
+    .then(() => {
+        // بما أننا نستخدم no-cors، سنفترض النجاح هنا ونوجه المستخدم
+        showModal('success', 'تم الإرسال', `شكراً ${selectedEmployee}، تم إرسال طلبك بنجاح.`);
+        setTimeout(() => location.href = 'index.html', 3000);
+    })
+    .catch(err => {
+        showModal('error', 'فشل في الإرسال', 'يرجى مراجعة اتصال الإنترنت.');
+    });
+}
 
     function showModal(type, title, msg) {
         els.modal.classList.remove('hidden');
