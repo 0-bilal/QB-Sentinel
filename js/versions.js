@@ -18,7 +18,7 @@ function updateDisplayedVersions() {
         const path = window.location.pathname;
         if (path.includes('ECL')) versionElement.innerText = APP_VERSIONS.ECL;
         else if (path.includes('FIL')) versionElement.innerText = APP_VERSIONS.FIL;
-        else if (path.includes('PV')) versionElement.innerText = APP_VERSIONS.CPV;
+        else if (path.includes('CPV')) versionElement.innerText = APP_VERSIONS.CPV;
         else if (path.includes('EDR')) versionElement.innerText = APP_VERSIONS.EDR;
         else if (path.includes('PRR')) versionElement.innerText = APP_VERSIONS.PRR;
         else if (path.includes('PAL')) versionElement.innerText = APP_VERSIONS.PAL;
