@@ -1,6 +1,6 @@
     document.addEventListener('DOMContentLoaded', () => {
     // الرابط الخاص بجوجل سكريبت (تأكد من تحديثه بعد النشر)
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxo6HvZbsqb-Qc4HQPRQpDdC7PjqWPgHwT8_uFN0Jn0aPvbNpQL6O8d5vg0mskfXQVALg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwb9C7JGfvYXk6o95mo3OteBUdJIrGm8e9gKPDyX0Ded_hMViX8u0UsmPYW0jlVgs-h4Q/exec';
 
     // قاعدة بيانات الموظفين
     const employeeDatabase = {
