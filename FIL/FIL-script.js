@@ -318,15 +318,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const empId  = document.getElementById('employeeId').value;
     const branch = document.querySelector('input[name="branch"]:checked');
 
-    let missingSelection = [];
-    let missingWeight    = [];
-    
-    // تعريف المصفوفات التي كانت مفقودة وتسبب الخطأ
+    // ✅ الخطوة 1: تعريف المصفوفات في نطاق الدالة الرئيسي
     let inspected = [];
     let na = [];
     let damaged = [];
+    let missingSelection = [];
+    let missingWeight    = [];
 
-    // تجميع البيانات من الأسطر
+    // ✅ الخطوة 2: تجميع البيانات من الأسطر
     document.querySelectorAll('.fruit-row').forEach(row => {
         const nameAr      = row.getAttribute('data-fruit-name');
         const isChecked   = row.querySelector('.status-check:checked');
@@ -340,21 +339,23 @@ document.addEventListener('DOMContentLoaded', () => {
             missingSelection.push(nameAr);
         } else {
             // ملء المصفوفات بالبيانات
-            if (isNA) na.push(nameAr);
-            if (isInspected && !isDamaged) inspected.push(nameAr);
-            if (isDamaged) {
-                if (!weightInput.value || parseFloat(weightInput.value) <= 0) {
-                    row.classList.add('row-error');
-                    missingWeight.push(nameAr);
-                } else {
-                    damaged.push(`${nameAr} (${weightInput.value}g)`);
-                    inspected.push(nameAr); // التالف يعتبر تم فحصه أيضاً
+            if (isNA) {
+                na.push(nameAr);
+            } else {
+                if (isInspected) inspected.push(nameAr);
+                if (isDamaged) {
+                    if (!weightInput.value || parseFloat(weightInput.value) <= 0) {
+                        row.classList.add('row-error');
+                        missingWeight.push(nameAr);
+                    } else {
+                        damaged.push(`${nameAr} (${weightInput.value}g)`);
+                    }
                 }
             }
         }
     });
 
-    // التحقق من صحة البيانات قبل الإرسال
+    // ✅ الخطوة 3: التحقق من صحة البيانات قبل الإرسال
     if (missingSelection.length > 0) {
         showModal('error', 'تقرير غير مكتمل', `يرجى فحص جميع الأصناف. لم يتم فحص: ${missingSelection.slice(0, 3).join('، ')}`);
         return;
@@ -374,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // بدء عملية الإرسال الحقيقية
+    // ✅ الخطوة 4: بدء عملية الإرسال الحقيقية
     showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم رفع البيانات والصور...');
     els.submitBtn.disabled = true;
 
@@ -389,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
         image:         compressedImageBase64
     };
 
-    // استخدام URLSearchParams لتجاوز CORS وقراءة الرد
+    // ✅ الخطوة 5: استخدام URLSearchParams لتجاوز CORS وقراءة الرد
     const formData = new URLSearchParams();
     formData.append('payload', JSON.stringify(payload));
 
@@ -415,6 +416,5 @@ document.addEventListener('DOMContentLoaded', () => {
         els.submitBtn.disabled = false;
         els.submitBtn.style.opacity = "1";
     }
-
-    });
+});
 });
