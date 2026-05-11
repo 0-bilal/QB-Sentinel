@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeEakq-kxXanUxNZXwy-ZAixfV_9L9b5j4IKrRPXOS8wnhduBLMBCHcjXoDwv4ulM4sg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0ClQdqWFm9j7rA52Xzyv8x-E4Qer8D68fQ34Wpww28RuG-pgfwwmhhQIQg2diwg/exec';
 
     const branchEmployees = {
         "Muzahmiyah": ["رمان", "محمد"],
