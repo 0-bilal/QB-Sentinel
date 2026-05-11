@@ -53,6 +53,25 @@
             <div id="employeeGrid" class="employee-grid"></div>
         </div>
 
+        <div id="savedInfo" class="hidden">
+    <div class="user-badge">
+        <i data-lucide="user-check"></i>
+        <span id="displayUser"></span> | <span id="displayBranch"></span>
+    </div>
+    <button id="resetBtn" class="reset-link">إعادة تعيين / Reset</button>
+</div>
+
+<div id="resetModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <h3>إدخال كود إعادة التعيين</h3>
+        <input type="text" id="resetCodeInput" placeholder="أدخل الكود هنا" class="code-input">
+        <div class="modal-footer">
+            <button id="confirmReset" class="modal-btn">تأكيد</button>
+            <button id="cancelReset" class="modal-btn secondary">إلغاء</button>
+        </div>
+    </div>
+</div>
+
         <div id="scannerSection" class="hidden">
             <div class="section-title">
                 <i data-lucide="qr-code"></i>
