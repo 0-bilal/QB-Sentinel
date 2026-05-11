@@ -1,69 +1,83 @@
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     
-    // --- الإعدادات ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5J0iQcA-oVhKwDYYA49w9kJRUrHR8KXwmoxCpDBbc_57SWgFnRz4MpWSmMZmalhbCNQ/exec'; 
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeEakq-kxXanUxNZXwy-ZAixfV_9L9b5j4IKrRPXOS8wnhduBLMBCHcjXoDwv4ulM4sg/exec'; 
     let currentMode = 'IN'; 
     let deviceId = localStorage.getItem('QB_DEVICE_ID');
+    let branchName = localStorage.getItem('QB_BRANCH_NAME');
     
     const qrContainer = document.getElementById("qrContainer");
     let qrGenerator = new QRCode(qrContainer, {
-        width: 256,
-        height: 256,
-        correctLevel: QRCode.CorrectLevel.H
+        width: 256, height: 256, correctLevel: QRCode.CorrectLevel.H
     });
 
-    // --- التحقق من تسجيل الجهاز ---
-    if (!deviceId) {
+    // التحقق من الجلسة المحفوظة
+    if (!deviceId || !branchName) {
         document.getElementById('setupScreen').classList.remove('hidden');
     } else {
-        document.getElementById('deviceDisplay').innerText = `جهاز: ${deviceId}`;
-        startSystem();
+        showMainSystem();
     }
 
-    // --- وظيفة تسجيل الجهاز لأول مرة ---
     document.getElementById('saveSetupBtn').onclick = () => {
         const input = document.getElementById('deviceIdInput').value.trim();
+        const btn = document.getElementById('saveSetupBtn');
+        
         if (input) {
-            deviceId = input;
-            localStorage.setItem('QB_DEVICE_ID', deviceId);
-            
-            // إرسال بيانات البصمة الأمنية للآيباد للتسجيل في الشيت
+            btn.disabled = true;
+            btn.innerText = "جاري التحقق...";
+
             const registrationData = {
                 action: 'REGISTER_DEVICE',
-                deviceId: deviceId,
+                deviceId: input,
                 userAgent: navigator.userAgent,
-                screenRes: `${window.screen.width}x${window.screen.height}`,
-                platform: navigator.platform
+                screenRes: `${window.screen.width}x${window.screen.height}`
             };
 
+            // استخدام Fetch مع معالجة الرد (لأننا نحتاج اسم الفرع)
+            // ملاحظة: تم تغيير POST ليدعم استقبال بيانات
             fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify(registrationData)
-            }).then(() => {
-                location.reload();
+            })
+            .then(res => res.text())
+            .then(response => {
+                if (response.startsWith("SUCCESS|")) {
+                    const name = response.split("|")[1];
+                    localStorage.setItem('QB_DEVICE_ID', input);
+                    localStorage.setItem('QB_BRANCH_NAME', name);
+                    location.reload();
+                } else {
+                    alert("عذراً: كود الفرع غير صحيح أو غير مسجل بالنظام.");
+                    btn.disabled = false;
+                    btn.innerText = "حفظ وإعداد الجهاز";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                btn.disabled = false;
             });
         }
     };
 
+    function showMainSystem() {
+        document.getElementById('deviceDisplay').innerText = `فرع: ${branchName}`;
+        startSystem();
+    }
+
     function startSystem() {
         updateQR();
-        setInterval(updateQR, 30000); // تحديث الكود كل 30 ثانية للأمان
+        setInterval(updateQR, 30000); 
         setInterval(updateTime, 1000);
     }
 
     function updateQR() {
         const timestamp = Date.now();
-        // تشفير: معرف الجهاز | العملية | الوقت
         const rawData = `${deviceId}|${currentMode}|${timestamp}`;
         const encodedData = btoa(rawData); 
-        
         qrGenerator.clear();
         qrGenerator.makeCode(encodedData);
         
-        // تحديث شريط الوقت المرئي
+        // Timer Bar Logic
         const bar = document.getElementById('timerBar');
         if (bar) {
             bar.style.transition = 'none';
@@ -77,11 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateTime() {
         const now = new Date();
+        // عرض الأرقام بالإنجليزية بناءً على توجيهاتك السابقة
         const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
         document.getElementById('timestamp').innerText = timeStr;
     }
 
-    // --- التحكم في الأزرار ---
     document.getElementById('btnIn').onclick = () => {
         currentMode = 'IN';
         document.getElementById('processTitle').innerText = 'تسجيل حضور';
