@@ -53,16 +53,6 @@
             <div id="employeeGrid" class="employee-grid"></div>
         </div>
 
-        <div id="branchConfigSection">
-    <div class="section-title">
-        <i data-lucide="shield-check"></i>
-        <span>كود التحقق للفرع / Branch Code</span>
-    </div>
-    <input type="password" id="branchCodeInput" placeholder="أدخل كود الفرع الخاص بك" class="main-input">
-</div>
-
-<button id="resetBtn" class="reset-link hidden" onclick="resetEmployeeDevice()">إعادة تهيئة الجهاز (للمدير فقط)</button>
-
         <div id="scannerSection" class="hidden">
             <div class="section-title">
                 <i data-lucide="qr-code"></i>
@@ -79,14 +69,7 @@
     </footer>
 </div>
 
+<script src="js/versions.js"></script>
 <script src="ATT.js"></script>
-
-<style>
-    .locked { opacity: 0.7; pointer-events: none; }
-    .main-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; text-align: center; font-size: 1.2rem; }
-    .reset-link { background: none; border: none; color: #ff4444; cursor: pointer; margin-top: 20px; font-size: 0.9rem; text-decoration: underline; width: 100%; }
-    .hidden { display: none; }
-</style>
-
 </body>
 </html>
