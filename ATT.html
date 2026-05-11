@@ -41,7 +41,7 @@
 
 <div class="form-container">
 
-    <!-- Header — نفس بنية ECL -->
+    <!-- Header -->
     <header class="main-header">
         <div class="header-overlay"></div>
         <div class="logo-area">
@@ -69,7 +69,7 @@
     <!-- بطاقة الفرع -->
     <div class="card" id="branchCard">
         <label class="label-heading">اختيار الفرع / Select Branch <span class="required">*</span></label>
-        <div class="branch-selector branch-grid">
+        <div class="branch-grid">
             <input type="radio" id="branch1" name="branch" value="Dawadimi">
             <label for="branch1" class="branch-tile">
                 <i data-lucide="map-pin"></i>
@@ -90,10 +90,16 @@
         </div>
     </div>
 
-    <!-- بطاقة الموظف -->
-    <div class="card hidden" id="employeeSection">
+    <!-- بطاقة الموظف — تظهر دائماً -->
+    <div class="card" id="employeeCard">
         <label class="label-heading">اختر اسمك / Select Your Name <span class="required">*</span></label>
-        <div id="employeeGrid" class="branch-grid employee-grid"></div>
+        <div id="employeeGrid" class="branch-grid employee-placeholder-grid">
+            <div class="emp-placeholder">
+                <i data-lucide="user-x"></i>
+                <span>يرجى اختيار الفرع أولاً</span>
+                <small>Please select the branch first</small>
+            </div>
+        </div>
     </div>
 
     <!-- بطاقة المعلومات المحفوظة -->
@@ -114,21 +120,63 @@
         </button>
     </div>
 
-    <!-- بطاقة الماسح -->
-    <div id="scannerSection" class="card hidden">
+    <!-- بطاقة الماسح — تظهر دائماً -->
+    <div class="card" id="scannerCard">
         <label class="label-heading">مسح رمز QR / Scan QR Code <span class="required">*</span></label>
-        <div class="scanner-wrapper">
-            <div id="reader"></div>
+
+        <!-- حالة الانتظار (قبل اختيار الموظف) -->
+        <div id="scannerIdle" class="scanner-idle-state">
+            <div class="scanner-idle-icon">
+                <i data-lucide="qr-code"></i>
+            </div>
+            <p class="scanner-idle-title">في انتظار اختيار الموظف</p>
+            <small class="scanner-idle-sub">Waiting for employee selection</small>
+            <div class="scanner-idle-steps">
+                <div class="step-item">
+                    <div class="step-num">١</div>
+                    <span>اختر الفرع</span>
+                </div>
+                <div class="step-arrow"><i data-lucide="chevron-left"></i></div>
+                <div class="step-item">
+                    <div class="step-num">٢</div>
+                    <span>اختر اسمك</span>
+                </div>
+                <div class="step-arrow"><i data-lucide="chevron-left"></i></div>
+                <div class="step-item">
+                    <div class="step-num">٣</div>
+                    <span>امسح الرمز</span>
+                </div>
+            </div>
         </div>
-        <p class="hint-text">
-            <i data-lucide="monitor-smartphone"></i>
-            وجه الكاميرا نحو شاشة الآيباد الثابتة في المحل
-        </p>
+
+        <!-- حالة طلب الإذن -->
+        <div id="scannerPermission" class="scanner-idle-state hidden">
+            <div class="scanner-idle-icon permission-icon">
+                <i data-lucide="camera-off"></i>
+            </div>
+            <p class="scanner-idle-title">يلزم إذن الكاميرا</p>
+            <small class="scanner-idle-sub">Camera permission required</small>
+            <button id="retryCamera" class="camera-retry-btn">
+                <i data-lucide="camera"></i>
+                السماح بالوصول / Allow Access
+            </button>
+        </div>
+
+        <!-- الماسح الفعلي -->
+        <div id="scannerSection" class="hidden">
+            <div class="scanner-wrapper">
+                <div id="reader"></div>
+            </div>
+            <p class="hint-text">
+                <i data-lucide="monitor-smartphone"></i>
+                وجه الكاميرا نحو شاشة الآيباد الثابتة في المحل
+            </p>
+        </div>
     </div>
 
 </div>
 
-<!-- Footer — نفس بنية ECL -->
+<!-- Footer -->
 <footer class="developer-footer">
     <div class="dev-card">
         <div class="dev-card-content">
