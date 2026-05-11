@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     
     // --- الإعدادات ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_n3uEJorR0gFOpxGYS3y5lwHsHeppI6CkJBGdiGs2DxyMl6LEfhH5T3zMbKY0eJDA3g/exec'; 
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5J0iQcA-oVhKwDYYA49w9kJRUrHR8KXwmoxCpDBbc_57SWgFnRz4MpWSmMZmalhbCNQ/exec'; 
     let currentMode = 'IN'; 
     let deviceId = localStorage.getItem('QB_DEVICE_ID');
     
