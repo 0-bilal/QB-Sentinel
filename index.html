@@ -7,6 +7,27 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/x-icon" href="ico/logo.ico">
+
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="QB-Sentinel">
+<link rel="apple-touch-icon" href="logo.png">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('تم تفعيل نظام التطبيق بنجاح'))
+        .catch(err => console.log('فشل التفعيل:', err));
+    });
+  }
+</script>
+
+
+
 </head>
 <body>
 
@@ -56,7 +77,7 @@
         </div>
     </a>
 
-    <a href="FIL" class="report-card">
+    <a href="FIL.html" class="report-card">
         <div class="report-card-icon">
             <i data-lucide="apple"></i>
         </div>
@@ -71,7 +92,7 @@
         </div>
     </a>
 
-    <a href="" class="report-card">
+    <a href="PAL.html" class="report-card">
     <div class="report-card-icon">
         <i data-lucide="boxes"></i>
     </div>
@@ -101,7 +122,7 @@
         </div>
     </a>
 
-    <a href="" class="report-card">
+    <a href="EDR.html" class="report-card">
     <div class="report-card-icon">
         <i data-lucide="calendar-check"></i>
     </div>
@@ -117,7 +138,7 @@
     </div>
 </a>
 
-<a href="" class="report-card">
+<a href="PRR.html" class="report-card">
     <div class="report-card-icon">
         <i data-lucide="rotate-ccw"></i>
     </div>
@@ -131,6 +152,36 @@
         <i data-lucide="chevron-left"></i>
     </div>
 </a>    
+
+<a href="ATT.html" class="report-card">
+    <div class="report-card-icon">
+        <i data-lucide="user-check"></i>
+    </div>
+    <div class="report-card-body">
+        <h3>حضور وانصراف الموظفين</h3>
+        <p>STAFF ATTENDANCE (IN/OUT)</p>
+        <span class="report-tag">ATT</span>
+        <span class="report-tag"></span>
+    </div>
+    <div class="report-card-arrow">
+        <i data-lucide="chevron-left"></i>
+    </div>
+</a>
+
+<a href="REM.html" class="report-card">
+    <div class="report-card-icon">
+        <i data-lucide="bell-ring"></i>
+    </div>
+    <div class="report-card-body">
+        <h3>تذكير تجديد الإقامات والعقود</h3>
+        <p>ID & CONTRACT RENEWAL REMINDER</p>
+        <span class="report-tag">REM</span>
+        <span class="report-tag">الاطلاق قريبا - LAUNCHING SOON</span>
+    </div>
+    <div class="report-card-arrow">
+        <i data-lucide="chevron-left"></i>
+    </div>
+</a>
 
 </div>
 
