@@ -43,13 +43,22 @@
     </div>
 </div>
 
+
 <div class="form-container">
     <header class="main-header">
         <div class="header-overlay"></div>
         <div class="logo-area">
+
+<div class="logo-area">
+    <div class="header-actions-top">
+        <button id="refreshApp" class="refresh-btn" title="تحديث النظام">
+            <i data-lucide="refresh-cw"></i>
+        </button>
+    </div>
+
             <img src="ico/logo.ico" alt="Logo" class="logo">
             <h1>عصير تايم</h1>
-            <p class="en-sub-header">LIST OF REPORTS ASEERTIME</p>
+            <p class="en-sub-header">ASEERTIME</p>
         </div>
     </header>
 
@@ -64,19 +73,19 @@
 
         <div class="reports-grid">
     
-    <a href="ECL.html" class="report-card">
-        <div class="report-card-icon">
-            <i data-lucide="refrigerator"></i>
-        </div>
-        <div class="report-card-body">
-            <h3>سجل تنظيف المعدات</h3>
-            <p>EQUIPMENT CLEANING LOG</p>
-            <span class="report-tag">ECL</span>
-            <span class="report-tag"></span>
-        </div>
-        <div class="report-card-arrow">
-            <i data-lucide="chevron-left"></i>
-        </div>
+    <a href="ATT.html" class="report-card">
+    <div class="report-card-icon">
+        <i data-lucide="user-check"></i>
+    </div>
+    <div class="report-card-body">
+        <h3>حضور وانصراف الموظفين</h3>
+        <p>STAFF ATTENDANCE (IN/OUT)</p>
+        <span class="report-tag">ATT</span>
+        <span class="report-tag"></span>
+    </div>
+    <div class="report-card-arrow">
+        <i data-lucide="chevron-left"></i>
+    </div>
     </a>
 
     <a href="FIL.html" class="report-card">
@@ -93,23 +102,24 @@
             <i data-lucide="chevron-left"></i>
         </div>
     </a>
+            
+    <a href="ECL.html" class="report-card">
+        <div class="report-card-icon">
+            <i data-lucide="refrigerator"></i>
+        </div>
+        <div class="report-card-body">
+            <h3>سجل تنظيف المعدات</h3>
+            <p>EQUIPMENT CLEANING LOG</p>
+            <span class="report-tag">ECL</span>
+            <span class="report-tag"></span>
+        </div>
+        <div class="report-card-arrow">
+            <i data-lucide="chevron-left"></i>
+        </div>
+    </a>
 
-<a href="ATT.html" class="report-card">
-    <div class="report-card-icon">
-        <i data-lucide="user-check"></i>
-    </div>
-    <div class="report-card-body">
-        <h3>حضور وانصراف الموظفين</h3>
-        <p>STAFF ATTENDANCE (IN/OUT)</p>
-        <span class="report-tag">ATT</span>
-        <span class="report-tag"></span>
-    </div>
-    <div class="report-card-arrow">
-        <i data-lucide="chevron-left"></i>
-    </div>
-</a>
 
-<a href="CPV.html" class="report-card">
+    <a href="CPV.html" class="report-card">
         <div class="report-card-icon">
             <i data-lucide="banknote"></i>
         </div>
@@ -140,23 +150,6 @@
     </div>
     </a>
 
-
-    <a href="EDR.html" class="report-card">
-    <div class="report-card-icon">
-        <i data-lucide="calendar-check"></i>
-    </div>
-    <div class="report-card-body">
-        <h3>تقرير نهاية اليوم</h3>
-        <p>END OF DAY REPORT</p>
-        <span class="report-tag">EDR</span>
-        <span class="report-tag">الاطلاق قريبا - LAUNCHING SOON</span>
-        
-    </div>
-    <div class="report-card-arrow">
-        <i data-lucide="chevron-left"></i>
-    </div>
-</a>
-
 <a href="PRR.html" class="report-card">
     <div class="report-card-icon">
         <i data-lucide="rotate-ccw"></i>
@@ -172,6 +165,21 @@
     </div>
 </a>    
 
+<a href="EDR.html" class="report-card">
+    <div class="report-card-icon">
+        <i data-lucide="calendar-check"></i>
+    </div>
+    <div class="report-card-body">
+        <h3>تقرير نهاية اليوم</h3>
+        <p>END OF DAY REPORT</p>
+        <span class="report-tag">EDR</span>
+        <span class="report-tag">الاطلاق قريبا - LAUNCHING SOON</span>
+        
+    </div>
+    <div class="report-card-arrow">
+        <i data-lucide="chevron-left"></i>
+    </div>
+    </a>
 
 <a href="REM.html" class="report-card">
     <div class="report-card-icon">
@@ -212,7 +220,7 @@
         </div>
     </div>
 </footer>
-
+<script src="js/common.js"></script>
 <script src="js/script.js"></script>
 <script src="js/versions.js"></script>
 <script>lucide.createIcons();</script>
