@@ -8,20 +8,22 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/x-icon" href="ico/logo.ico">
 
+<link rel="icon" type="image/png" sizes="192x192" href="ico/logo.png">
+<link rel="apple-touch-icon" href="ico/logo.png">
 
 <link rel="manifest" href="manifest.json">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QB-Sentinel">
-<link rel="apple-touch-icon" href="logo.png">
+<meta name="theme-color" content="#c62828">
 
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
         .then(reg => console.log('تم تفعيل نظام التطبيق بنجاح'))
-        .catch(err => console.log('فشل التفعيل:', err));
+        .catch(err => console.error('فشل تفعيل الـ Service Worker:', err));
     });
   }
 </script>
@@ -46,7 +48,7 @@
         <div class="header-overlay"></div>
         <div class="logo-area">
             <img src="ico/logo.ico" alt="Logo" class="logo">
-            <h1>قائمه التقارير عصير تايم (الدوادمي & المزاحمية) </h1>
+            <h1>قائمة التقارير عصير تايم (الدوادمي & المزاحمية) </h1>
             <p class="en-sub-header">LIST OF REPORTS ASEERTIME</p>
         </div>
     </header>
@@ -82,7 +84,7 @@
             <i data-lucide="apple"></i>
         </div>
         <div class="report-card-body">
-            <h3>سجل فحص الفواكه</h3>
+            <h3>سجل فحص الفواكة</h3>
             <p>FRUIT INSPECTION LOG</p>
             <span class="report-tag">FIL</span>
             <span class="report-tag"></span>
@@ -91,6 +93,37 @@
             <i data-lucide="chevron-left"></i>
         </div>
     </a>
+
+<a href="ATT.html" class="report-card">
+    <div class="report-card-icon">
+        <i data-lucide="user-check"></i>
+    </div>
+    <div class="report-card-body">
+        <h3>حضور وانصراف الموظفين</h3>
+        <p>STAFF ATTENDANCE (IN/OUT)</p>
+        <span class="report-tag">ATT</span>
+        <span class="report-tag"></span>
+    </div>
+    <div class="report-card-arrow">
+        <i data-lucide="chevron-left"></i>
+    </div>
+</a>
+
+<a href="CPV.html" class="report-card">
+        <div class="report-card-icon">
+            <i data-lucide="banknote"></i>
+        </div>
+        <div class="report-card-body">
+            <h3>سند صرف نقدية</h3>
+            <p>CASH PAYMENT VOUCHER</p>
+            <span class="report-tag">CPV</span>
+            <span class="report-tag">الاطلاق قريبا - LAUNCHING SOON</span>
+        </div>
+        <div class="report-card-arrow">
+            <i data-lucide="chevron-left"></i>
+        </div>
+    </a>
+
 
     <a href="PAL.html" class="report-card">
     <div class="report-card-icon">
@@ -105,22 +138,8 @@
     <div class="report-card-arrow">
         <i data-lucide="chevron-left"></i>
     </div>
-</a>
-
-    <a href="CPV.html" class="report-card">
-        <div class="report-card-icon">
-            <i data-lucide="banknote"></i>
-        </div>
-        <div class="report-card-body">
-            <h3>سند صرف نقدية</h3>
-            <p>CASH PAYMENT VOUCHER</p>
-            <span class="report-tag">CPV</span>
-            <span class="report-tag">الاطلاق قريبا - LAUNCHING SOON</span>
-        </div>
-        <div class="report-card-arrow">
-            <i data-lucide="chevron-left"></i>
-        </div>
     </a>
+
 
     <a href="EDR.html" class="report-card">
     <div class="report-card-icon">
@@ -153,20 +172,6 @@
     </div>
 </a>    
 
-<a href="ATT.html" class="report-card">
-    <div class="report-card-icon">
-        <i data-lucide="user-check"></i>
-    </div>
-    <div class="report-card-body">
-        <h3>حضور وانصراف الموظفين</h3>
-        <p>STAFF ATTENDANCE (IN/OUT)</p>
-        <span class="report-tag">ATT</span>
-        <span class="report-tag"></span>
-    </div>
-    <div class="report-card-arrow">
-        <i data-lucide="chevron-left"></i>
-    </div>
-</a>
 
 <a href="REM.html" class="report-card">
     <div class="report-card-icon">
