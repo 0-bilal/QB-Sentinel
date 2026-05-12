@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqxwJ5CBwjPSX-8CZSLVOSz5k7eOyd95mPOHGXXWo_Q_Gb7PgJUVizv_vTqIVqJ7CcIA/exec';
 
@@ -23,110 +24,76 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const els = {
-        branchRadios: document.querySelectorAll('input[name="branch"]'),
-        employeeGrid: document.getElementById('employeeGrid'),
-        preview: document.getElementById('imagePreview'),
-        container: document.getElementById('imagePreviewContainer'),
-        drop: document.getElementById('dropArea'),
-        remove: document.getElementById('removeImage'),
-        form: document.getElementById('cleaningReportForm'),
-        submitBtn: document.querySelector('button[type="submit"]'),
-        modal: document.getElementById('customModal'),
-        modalTitle: document.getElementById('modalTitle'),
-        modalMsg: document.getElementById('modalMessage'),
-        modalIcon: document.getElementById('modalIcon'),
-        modalLoader: document.getElementById('modalLoader'),
-        modalClose: document.getElementById('modalClose')
+        branchRadios : document.querySelectorAll('input[name="branch"]'),
+        employeeGrid : document.getElementById('employeeGrid'),
+        preview      : document.getElementById('imagePreview'),
+        container    : document.getElementById('imagePreviewContainer'),
+        drop         : document.getElementById('dropArea'),
+        remove       : document.getElementById('removeImage'),
+        form         : document.getElementById('cleaningReportForm'),
+        submitBtn    : document.querySelector('button[type="submit"]'),
+        modal        : document.getElementById('customModal'),
+        modalTitle   : document.getElementById('modalTitle'),
+        modalMsg     : document.getElementById('modalMessage'),
+        modalIcon    : document.getElementById('modalIcon'),
+        modalLoader  : document.getElementById('modalLoader'),
+        modalClose   : document.getElementById('modalClose')
     };
 
     let compressedImageBase64 = null;
 
     // ===================================================
-    // إنشاء input الكاميرا
-    //
-    // ✅ بدون capture نهائياً — نفس حل FIL
-    //    يمنع كروم من حجز مساحة مؤقتة تسبب خطأ "مساحة منخفضة"
-    //
-    // ✅ الـ input في document.body وليس داخل label
-    //    يمنع فتح نافذة الاختيار مرتين على الكمبيوتر
+    //  تهيئة وحدة الكاميرا ECL-camera.js
     // ===================================================
-    function recreateCameraInput() {
-        const oldInput = document.getElementById('cameraInput');
-        if (oldInput) oldInput.remove();
+    ECLCamera.init({
+        maxWidth : 1024,
+        maxHeight: 1024,
+        quality  : 0.80,
 
-        const newInput = document.createElement('input');
-        newInput.type = 'file';
-        newInput.id = 'cameraInput';
-        newInput.accept = 'image/*';
-        // ❌ بدون capture نهائياً
-        newInput.style.display = 'none';
+        // ✅ يُستدعى عند قبول المستخدم للصورة
+        onCapture: (base64Image) => {
+            compressedImageBase64 = base64Image;
+            els.preview.src = base64Image;
+            els.container.classList.remove('hidden');
+            els.drop.classList.add('hidden');
+        },
 
-        // في body وليس داخل label
-        document.body.appendChild(newInput);
-        newInput.addEventListener('change', handleImageChange);
-
-        return newInput;
-    }
-
-    // فتح نافذة الاختيار عند الضغط على منطقة الرفع
-    els.drop.addEventListener('click', (e) => {
-        e.preventDefault();
-        const input = document.getElementById('cameraInput');
-        if (input) input.click();
+        // ✅ يُستدعى عند إغلاق الكاميرا بدون التقاط
+        onClose: () => {
+            // لا نفعل شيئاً إذا لم تُلتقط صورة
+        }
     });
 
     // ===================================================
-    // معالجة الصورة بعد الاختيار
+    //  فتح الكاميرا عند الضغط على منطقة الرفع
     // ===================================================
-    async function handleImageChange(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        els.submitBtn.disabled = true;
-        els.submitBtn.style.opacity = "0.5";
-        els.drop.style.pointerEvents = 'none';
-
-        try {
-            compressedImageBase64 = await compressImage(file, 800, 800, 0.7);
-            els.preview.src = compressedImageBase64;
-            els.container.classList.remove('hidden');
-            els.drop.classList.add('hidden');
-        } catch (error) {
-            console.error("فشل في معالجة الصورة:", error);
-            alert("حدث خطأ في معالجة الصورة، حاول مجدداً");
-            resetImageState();
-        } finally {
-            els.submitBtn.disabled = false;
-            els.submitBtn.style.opacity = "1";
-            els.drop.style.pointerEvents = 'auto';
-        }
-    }
+    els.drop.addEventListener('click', (e) => {
+        e.preventDefault();
+        ECLCamera.open();
+    });
 
     // ===================================================
-    // إعادة تعيين حالة الصورة
+    //  حذف الصورة وإعادة الضبط
     // ===================================================
-    function resetImageState() {
-        compressedImageBase64 = null;
-        els.preview.src = '';
-        els.container.classList.add('hidden');
-        els.drop.classList.remove('hidden');
-        els.drop.style.display = '';
-        recreateCameraInput();
-        els.submitBtn.disabled = false;
-        els.submitBtn.style.opacity = "1";
-    }
-
-    // تهيئة عند البدء
-    recreateCameraInput();
-
     els.remove.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         resetImageState();
     });
 
+    function resetImageState() {
+    compressedImageBase64 = null;
+    els.preview.src = '';
+    els.container.classList.add('hidden'); // إخفاء المعاينة
+    els.drop.classList.remove('hidden'); // إظهار منطقة الرفع
+    // ✅ تم حذف سطر style.display المسبب للمشاكل
+    ECLCamera.reset();
+    els.submitBtn.disabled = false;
+    els.submitBtn.style.opacity = '1';
+}
+
     // ===================================================
-    // اختيار موظفي الفرع
+    //  اختيار موظفي الفرع
     // ===================================================
     els.branchRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -152,46 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ===================================================
-    // ضغط الصورة
-    // ===================================================
-    const compressImage = (file, maxWidth, maxHeight, quality) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > height) {
-                        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                    } else {
-                        if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
-                };
-                img.onerror = reject;
-            };
-            reader.onerror = reject;
-        });
-    };
-
-    // ===================================================
-    // Modal
+    //  Modal
     // ===================================================
     const showModal = (type, title, message) => {
         els.modal.classList.remove('hidden');
         els.modalTitle.innerText = title;
-        els.modalMsg.innerText = message;
+        els.modalMsg.innerText   = message;
         els.modalLoader.classList.add('hidden');
         els.modalClose.classList.add('hidden');
-        els.modalIcon.innerHTML = '';
+        els.modalIcon.innerHTML  = '';
 
         if (type === 'loading') {
             els.modalLoader.classList.remove('hidden');
@@ -206,26 +142,24 @@ document.addEventListener('DOMContentLoaded', () => {
     els.modalClose.onclick = () => els.modal.classList.add('hidden');
 
     // ===================================================
-    // إرسال النموذج
-    // ===================================================
-    // ===================================================
-    // إرسال النموذج (نسخة الإرسال الآمن)
+    //  إرسال النموذج
     // ===================================================
     els.form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const branch = document.querySelector('input[name="branch"]:checked');
-        const empName = document.querySelector('input[name="employeeName"]:checked');
+
+        const branch    = document.querySelector('input[name="branch"]:checked');
+        const empName   = document.querySelector('input[name="employeeName"]:checked');
         const equipment = document.querySelector('input[name="equipment"]:checked');
-        const empId = document.getElementById('employeeId').value;
+        const empId     = document.getElementById('employeeId').value;
 
         if (!branch || !empName || !equipment || !compressedImageBase64) {
-            showModal('error', 'بيانات ناقصة', 'يرجى إكمال جميع الحقول وتصوير المعدة.');
+            showModal('error', 'بيانات ناقصة', 'يرجى إكمال جميع الحقول والتقاط صورة المعدة.');
             return;
         }
 
         const employeeName = employeeDatabase[empId];
         if (!employeeName) {
-            showModal('error', 'خطأ في التحقق', 'رقم الموظف المرسل غير مسجل.');
+            showModal('error', 'خطأ في التحقق', 'رقم الموظف المُدخَل غير مسجل في النظام.');
             return;
         }
 
@@ -233,24 +167,23 @@ document.addEventListener('DOMContentLoaded', () => {
         els.submitBtn.disabled = true;
 
         const payload = {
-            branch: branch.value === 'Muzahmiyah' ? 'المزاحمية' : 'الدوادمي',
-            senderName: employeeName,
-            cleanerName: empName.value,
-            equipmentAr: equipment.parentElement.querySelector('span').innerText,
-            equipmentEn: equipment.parentElement.querySelector('small').innerText,
-            equipmentId: equipment.getAttribute('data-id'),
-            image: compressedImageBase64
+            branch      : branch.value === 'Muzahmiyah' ? 'المزاحمية' : 'الدوادمي',
+            senderName  : employeeName,
+            cleanerName : empName.value,
+            equipmentAr : equipment.parentElement.querySelector('span').innerText,
+            equipmentEn : equipment.parentElement.querySelector('small').innerText,
+            equipmentId : equipment.getAttribute('data-id'),
+            image       : compressedImageBase64
         };
 
-        // ✅ تحويل البيانات لتجاوز CORS وضمان قراءة الرد
         const formData = new URLSearchParams();
         formData.append('payload', JSON.stringify(payload));
 
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: formData,
-                mode: 'cors'
+                body  : formData,
+                mode  : 'cors'
             });
 
             const result = await response.json();
@@ -263,11 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(result.message || 'فشل في معالجة البيانات');
             }
         } catch (error) {
-            console.error("Submission Error:", error);
-            showModal('error', 'خطأ في الإرسال', 'تعذر الوصول للسيرفر. تأكد من الإنترنت وحاول مجدداً.');
+            console.error('Submission Error:', error);
+            showModal('error', 'خطأ في الإرسال', 'تعذّر الوصول للسيرفر. تأكد من الإنترنت وحاول مجدداً.');
         } finally {
             els.submitBtn.disabled = false;
-            els.submitBtn.style.opacity = "1";
+            els.submitBtn.style.opacity = '1';
         }
     });
 });
