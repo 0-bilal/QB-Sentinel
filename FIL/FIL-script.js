@@ -53,85 +53,58 @@ document.addEventListener('DOMContentLoaded', () => {
         modalClose:   document.getElementById('modalClose')
     };
 
-    let compressedImageBase64 = "";
+    let capturedImageBase64 = "";
 
     // ===================================================
-    // إنشاء input الكاميرا
-    //
-    // ✅ بدون capture نهائياً — نفس حل ECL
-    //    يمنع كروم من حجز مساحة مؤقتة تسبب خطأ "مساحة منخفضة"
-    //
-    // ✅ الـ input في document.body وليس داخل label
-    //    يمنع فتح نافذة الاختيار مرتين على الكمبيوتر
+    // تهيئة FILCamera
+    // يتم تحديث بيانات الموظف/الفرع عند فتح الكاميرا
     // ===================================================
-    function recreateCameraInput() {
-        const oldInput = document.getElementById('cameraInput');
-        if (oldInput) oldInput.remove();
+    function openCamera() {
+        const empId  = document.getElementById('employeeId').value.trim();
+        const branch = document.querySelector('input[name="branch"]:checked');
 
-        const newInput = document.createElement('input');
-        newInput.type = 'file';
-        newInput.id = 'cameraInput';
-        newInput.accept = 'image/*';
-        // ❌ بدون capture نهائياً
-        newInput.style.display = 'none';
+        FILCamera.init({
+            employeeName: employeeDatabase[empId] || 'غير محدد',
+            branchName:   branch
+                ? (branch.value === 'Muzahmiyah' ? 'المزاحمية' : 'الدوادمي')
+                : 'غير محدد',
+            onCapture: handleCameraCapture
+        });
 
-        // في body وليس داخل label
-        document.body.appendChild(newInput);
-        newInput.addEventListener('change', handleImageChange);
-
-        return newInput;
+        FILCamera.open();
     }
 
-    // فتح نافذة الاختيار عند الضغط على منطقة الرفع
+    // ===================================================
+    // استقبال الصورة من FILCamera بعد التأكيد
+    // الصورة تصل كـ base64 jpeg مع الـ watermark مدمج
+    // ===================================================
+    function handleCameraCapture(imageBase64) {
+        capturedImageBase64 = imageBase64;
+        els.preview.src = imageBase64;
+        els.container.classList.remove('hidden');
+        els.dropArea.classList.add('hidden');
+    }
+
+    // ===================================================
+    // فتح الكاميرا عند الضغط على منطقة الرفع
+    // ===================================================
     els.dropArea.addEventListener('click', (e) => {
         e.preventDefault();
-        const input = document.getElementById('cameraInput');
-        if (input) input.click();
+        openCamera();
     });
 
     // ===================================================
-    // معالجة الصورة بعد الاختيار
-    // ===================================================
-    async function handleImageChange(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        els.submitBtn.disabled = true;
-        els.submitBtn.style.opacity = "0.5";
-        els.dropArea.style.pointerEvents = 'none';
-
-        try {
-            compressedImageBase64 = await compressImage(file, 800, 800, 0.7);
-            els.preview.src = compressedImageBase64;
-            els.container.classList.remove('hidden');
-            els.dropArea.classList.add('hidden');
-        } catch (error) {
-            console.error("فشل في معالجة الصورة:", error);
-            alert("حدث خطأ في معالجة الصورة، حاول مجدداً");
-            resetImageState();
-        } finally {
-            els.submitBtn.disabled = false;
-            els.submitBtn.style.opacity = "1";
-            els.dropArea.style.pointerEvents = 'auto';
-        }
-    }
-
-    // ===================================================
-    // إعادة تعيين حالة الصورة
+    // إزالة الصورة وإعادة التعيين
     // ===================================================
     function resetImageState() {
-        compressedImageBase64 = "";
+        capturedImageBase64 = "";
         els.preview.src = '';
         els.container.classList.add('hidden');
         els.dropArea.classList.remove('hidden');
         els.dropArea.style.display = '';
-        recreateCameraInput();
         els.submitBtn.disabled = false;
         els.submitBtn.style.opacity = "1";
     }
-
-    // تهيئة عند البدء
-    recreateCameraInput();
 
     els.remove.addEventListener('click', (e) => {
         e.preventDefault();
@@ -196,37 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fruitGrid.after(toggleBtn);
         lucide.createIcons();
     }
-
-    // ===================================================
-    // ضغط الصورة
-    // ===================================================
-    const compressImage = (file, maxWidth, maxHeight, quality) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > height) {
-                        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                    } else {
-                        if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
-                };
-                img.onerror = reject;
-            };
-            reader.onerror = reject;
-        });
-    };
 
     // ===================================================
     // تغيير حالة الفاكهة
@@ -294,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetFullForm() {
         els.form.reset();
-        compressedImageBase64 = "";
+        capturedImageBase64 = "";
         document.querySelectorAll('.status-check').forEach(cb => cb.checked = false);
         document.querySelectorAll('.damage-input-wrapper').forEach(w => w.classList.add('hidden'));
         document.querySelectorAll('.fruit-row').forEach(row => row.classList.remove('row-error'));
@@ -313,108 +255,102 @@ document.addEventListener('DOMContentLoaded', () => {
     // إرسال النموذج
     // ===================================================
     els.form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    const empId  = document.getElementById('employeeId').value;
-    const branch = document.querySelector('input[name="branch"]:checked');
+        const empId  = document.getElementById('employeeId').value;
+        const branch = document.querySelector('input[name="branch"]:checked');
 
-    // ✅ الخطوة 1: تعريف المصفوفات في نطاق الدالة الرئيسي
-    let inspected = [];
-    let na = [];
-    let damaged = [];
-    let missingSelection = [];
-    let missingWeight    = [];
+        let inspected        = [];
+        let na               = [];
+        let damaged          = [];
+        let missingSelection = [];
+        let missingWeight    = [];
 
-    // ✅ الخطوة 2: تجميع البيانات من الأسطر
-    document.querySelectorAll('.fruit-row').forEach(row => {
-        const nameAr      = row.getAttribute('data-fruit-name');
-        const isChecked   = row.querySelector('.status-check:checked');
-        const isNA        = row.querySelector('[data-type="na"]').checked;
-        const isDamaged   = row.querySelector('[data-type="damaged"]').checked;
-        const isInspected = row.querySelector('[data-type="inspected"]').checked;
-        const weightInput = row.querySelector('.damage-qty');
+        document.querySelectorAll('.fruit-row').forEach(row => {
+            const nameAr      = row.getAttribute('data-fruit-name');
+            const isChecked   = row.querySelector('.status-check:checked');
+            const isNA        = row.querySelector('[data-type="na"]').checked;
+            const isDamaged   = row.querySelector('[data-type="damaged"]').checked;
+            const isInspected = row.querySelector('[data-type="inspected"]').checked;
+            const weightInput = row.querySelector('.damage-qty');
 
-        if (!isChecked) {
-            row.classList.add('row-error');
-            missingSelection.push(nameAr);
-        } else {
-            // ملء المصفوفات بالبيانات
-            if (isNA) {
-                na.push(nameAr);
+            if (!isChecked) {
+                row.classList.add('row-error');
+                missingSelection.push(nameAr);
             } else {
-                if (isInspected) inspected.push(nameAr);
-                if (isDamaged) {
-                    if (!weightInput.value || parseFloat(weightInput.value) <= 0) {
-                        row.classList.add('row-error');
-                        missingWeight.push(nameAr);
-                    } else {
-                        damaged.push(`${nameAr} (${weightInput.value}g)`);
+                if (isNA) {
+                    na.push(nameAr);
+                } else {
+                    if (isInspected) inspected.push(nameAr);
+                    if (isDamaged) {
+                        if (!weightInput.value || parseFloat(weightInput.value) <= 0) {
+                            row.classList.add('row-error');
+                            missingWeight.push(nameAr);
+                        } else {
+                            damaged.push(`${nameAr} (${weightInput.value}g)`);
+                        }
                     }
                 }
             }
-        }
-    });
-
-    // ✅ الخطوة 3: التحقق من صحة البيانات قبل الإرسال
-    if (missingSelection.length > 0) {
-        showModal('error', 'تقرير غير مكتمل', `يرجى فحص جميع الأصناف. لم يتم فحص: ${missingSelection.slice(0, 3).join('، ')}`);
-        return;
-    }
-    if (missingWeight.length > 0) {
-        showModal('error', 'وزن التالف مفقود', `يرجى إدخال وزن التالف لـ: ${missingWeight.slice(0, 3).join('، ')}`);
-        return;
-    }
-    if (!branch || !employeeDatabase[empId]) {
-        showModal('error', 'بيانات ناقصة', 'يرجى اختيار الفرع والتأكد من كود الموظف.');
-        return;
-    }
-
-    const anyDamaged = damaged.length > 0;
-    if (anyDamaged && !compressedImageBase64) {
-        showModal('error', 'صورة مفقودة', 'يرجى تصوير الفواكه التالفة قبل الإرسال.');
-        return;
-    }
-
-    // ✅ الخطوة 4: بدء عملية الإرسال الحقيقية
-    showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم رفع البيانات والصور...');
-    els.submitBtn.disabled = true;
-
-    const payload = {
-        reportType:    "فحص جودة الفواكه",
-        branch:        branch.value === "Muzahmiyah" ? "المزاحمية" : "الدوادمي",
-        employeeId:    empId,
-        employeeName:  employeeDatabase[empId],
-        inspectedList: inspected.join(" - "),
-        naList:        na.join(" - "),
-        damagedList:   damaged.join(" - "),
-        image:         compressedImageBase64
-    };
-
-    // ✅ الخطوة 5: استخدام URLSearchParams لتجاوز CORS وقراءة الرد
-    const formData = new URLSearchParams();
-    formData.append('payload', JSON.stringify(payload));
-
-    try {
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: formData,
-            mode: 'cors'
         });
 
-        const result = await response.json();
-
-        if (result.result === 'success') {
-            showModal('success', 'تم الإرسال', `تم إرسال تقرير فحص الفاكهة بنجاح برقم: ${result.id}`);
-            resetFullForm(); 
-        } else {
-            throw new Error(result.message || 'فشل السيرفر في معالجة الطلب');
+        if (missingSelection.length > 0) {
+            showModal('error', 'تقرير غير مكتمل', `يرجى فحص جميع الأصناف. لم يتم فحص: ${missingSelection.slice(0, 3).join('، ')}`);
+            return;
         }
-    } catch (error) {
-        console.error("Submission Error:", error);
-        showModal('error', 'فشل الإرسال', 'حدث خطأ في الاتصال بالسيرفر. يرجى التأكد من جودة الإنترنت وحاول مجدداً.');
-    } finally {
-        els.submitBtn.disabled = false;
-        els.submitBtn.style.opacity = "1";
-    }
-});
+        if (missingWeight.length > 0) {
+            showModal('error', 'وزن التالف مفقود', `يرجى إدخال وزن التالف لـ: ${missingWeight.slice(0, 3).join('، ')}`);
+            return;
+        }
+        if (!branch || !employeeDatabase[empId]) {
+            showModal('error', 'بيانات ناقصة', 'يرجى اختيار الفرع والتأكد من كود الموظف.');
+            return;
+        }
+
+        const anyDamaged = damaged.length > 0;
+        if (anyDamaged && !capturedImageBase64) {
+            showModal('error', 'صورة مفقودة', 'يرجى تصوير الفواكه التالفة قبل الإرسال.');
+            return;
+        }
+
+        showModal('loading', 'جاري الإرسال', 'يرجى الانتظار، يتم رفع البيانات والصور...');
+        els.submitBtn.disabled = true;
+
+        const payload = {
+            reportType:    "فحص جودة الفواكه",
+            branch:        branch.value === "Muzahmiyah" ? "المزاحمية" : "الدوادمي",
+            employeeId:    empId,
+            employeeName:  employeeDatabase[empId],
+            inspectedList: inspected.join(" - "),
+            naList:        na.join(" - "),
+            damagedList:   damaged.join(" - "),
+            image:         capturedImageBase64
+        };
+
+        const formData = new URLSearchParams();
+        formData.append('payload', JSON.stringify(payload));
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'cors'
+            });
+
+            const result = await response.json();
+
+            if (result.result === 'success') {
+                showModal('success', 'تم الإرسال', `تم إرسال تقرير فحص الفاكهة بنجاح برقم: ${result.id}`);
+                resetFullForm();
+            } else {
+                throw new Error(result.message || 'فشل السيرفر في معالجة الطلب');
+            }
+        } catch (error) {
+            console.error("Submission Error:", error);
+            showModal('error', 'فشل الإرسال', 'حدث خطأ في الاتصال بالسيرفر. يرجى التأكد من جودة الإنترنت وحاول مجدداً.');
+        } finally {
+            els.submitBtn.disabled = false;
+            els.submitBtn.style.opacity = "1";
+        }
+    });
 });
