@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>سجل تنظيف المعدات | ECL</title>
     <link rel="stylesheet" href="ECL/ECL-style.css">
-    <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/x-icon" href="ico/logo.ico">
 </head>
 <body>
-
-
 
 <div id="customModal" class="modal-overlay hidden">
     <div class="modal-content">
@@ -196,14 +194,14 @@
         <div class="card" id="photoCard">
             <label class="label-heading">التوثيق بالصورة / Photo Evidence <span class="required">*</span></label>
             <div class="camera-wrapper">
-                <label for="cameraInput" class="camera-trigger" id="dropArea">
+                <!-- زر فتح الكاميرا المباشرة — بدون input file -->
+                <div class="camera-trigger" id="dropArea">
                     <div class="icon-circle">
                         <i data-lucide="camera"></i>
                     </div>
                     <p>التقط صورة الآن</p>
-                    <small>Take a Photo</small>
-                    <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden required>
-                </label>
+                    <small>Live Camera • No Gallery</small>
+                </div>
                 
                 <div id="imagePreviewContainer" class="hidden">
                     <div class="preview-frame">
@@ -250,6 +248,9 @@
     </div>
 </footer>
 
+<!-- ترتيب التحميل مهم: camera أولاً ثم script -->
+
+<script src="ECL/ECL-camera.js"></script>
 <script src="ECL/ECL-script.js"></script>
 <script src="js/versions.js"></script>
 <script>lucide.createIcons();</script>
