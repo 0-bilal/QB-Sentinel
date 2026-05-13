@@ -1,244 +1,270 @@
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * QB-Sentinel — ATT-script.js v2.0
+ * شاشة تسجيل الحضور والانصراف للموظفين
+ * يستخدم FingerprintJS v4 لبصمة الجهاز
+ */
+document.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
 
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0ClQdqWFm9j7rA52Xzyv8x-E4Qer8D68fQ34Wpww28RuG-pgfwwmhhQIQg2diwg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGpMtn5R96F1e9qbGonE_neD8X3k7_9epv2Xiflu7Aq3EKqjUDGnmuh93tDyUTamFc/exec';
 
+    // ─── بيانات الموظفين ───────────────────────────────────────
     const branchEmployees = {
-    "Muzahmiyah": [
-        { ar: "رمان", en: "Rumaan" },
-        { ar: "محمد", en: "Mohamed" }
-    ],
-    "Dawadimi": [
-        { ar: "شاهين", en: "Shahin" },
-        { ar: "دورجا", en: "Dwrja" },
-        { ar: "نسيم", en: "Nasim" },
-        { ar: "بلال", en: "Bilal" }
-    ]
-};
-
-    let selectedEmployee = localStorage.getItem('qb_staff_name')   || "";
-    let selectedBranch   = localStorage.getItem('qb_staff_branch') || "";
-    let html5QrCode = null;
-    let scannerRunning = false;
-    let employeeReady = false;
-
-    const els = {
-        branchCard:         document.getElementById('branchCard'),
-        employeeCard:       document.getElementById('employeeCard'),
-        empGrid:            document.getElementById('employeeGrid'),
-        scannerCard:        document.getElementById('scannerCard'),
-        scannerIdle:        document.getElementById('scannerIdle'),
-        scannerPermission:  document.getElementById('scannerPermission'),
-        scannerSection:     document.getElementById('scannerSection'),
-        savedInfo:          document.getElementById('savedInfo'),
-        displayUser:        document.getElementById('displayUser'),
-        displayBranch:      document.getElementById('displayBranch'),
-        resetBtn:           document.getElementById('resetBtn'),
-        retryCamera:        document.getElementById('retryCamera'),
-        modal:              document.getElementById('customModal'),
-        modalTitle:         document.getElementById('modalTitle'),
-        modalMsg:           document.getElementById('modalMessage'),
-        modalClose:         document.getElementById('modalClose'),
-        modalLoader:        document.getElementById('modalLoader'),
-        modalIcon:          document.getElementById('modalIcon'),
-        resetModal:         document.getElementById('resetModal'),
-        resetCodeInput:     document.getElementById('resetCodeInput'),
-        confirmReset:       document.getElementById('confirmReset'),
-        cancelReset:        document.getElementById('cancelReset'),
+        "المزاحمية": [
+            { ar: "رمان",  en: "Rumaan"  },
+            { ar: "محمد",  en: "Mohamed" },
+        ],
+        "الدوادمي": [
+            { ar: "شاهين", en: "Shahin"  },
+            { ar: "دورجا", en: "Dwrja"   },
+            { ar: "نسيم",  en: "Nasim"   },
+            { ar: "بلال",  en: "Bilal"   },
+        ],
     };
 
-    // ===================================================
-    // إدارة حالات الماسح
-    // ===================================================
+    const BRANCH_DISPLAY = {
+        "Muzahmiyah": "المزاحمية",
+        "Dawadimi":   "الدوادمي",
+    };
+
+    // ─── الحالة ────────────────────────────────────────────────
+    let selectedEmployee = localStorage.getItem('qb_staff_name')   || "";
+    let selectedBranchAr = localStorage.getItem('qb_staff_branch') || "";
+    let html5QrCode      = null;
+    let employeeReady    = false;
+    let deviceFingerprint = "";   // سيُملأ من FingerprintJS
+
+    // ─── العناصر ───────────────────────────────────────────────
+    const els = {
+        branchCard:        document.getElementById('branchCard'),
+        employeeCard:      document.getElementById('employeeCard'),
+        empGrid:           document.getElementById('employeeGrid'),
+        scannerCard:       document.getElementById('scannerCard'),
+        scannerIdle:       document.getElementById('scannerIdle'),
+        scannerPermission: document.getElementById('scannerPermission'),
+        scannerSection:    document.getElementById('scannerSection'),
+        savedInfo:         document.getElementById('savedInfo'),
+        displayUser:       document.getElementById('displayUser'),
+        displayBranch:     document.getElementById('displayBranch'),
+        fpBadge:           document.getElementById('fpBadge'),
+        resetBtn:          document.getElementById('resetBtn'),
+        retryCamera:       document.getElementById('retryCamera'),
+        modal:             document.getElementById('customModal'),
+        modalTitle:        document.getElementById('modalTitle'),
+        modalMsg:          document.getElementById('modalMessage'),
+        modalClose:        document.getElementById('modalClose'),
+        modalLoader:       document.getElementById('modalLoader'),
+        modalIcon:         document.getElementById('modalIcon'),
+        resetModal:        document.getElementById('resetModal'),
+        resetCodeInput:    document.getElementById('resetCodeInput'),
+        confirmReset:      document.getElementById('confirmReset'),
+        cancelReset:       document.getElementById('cancelReset'),
+    };
+
+    // =========================================================
+    // 1. تهيئة FingerprintJS — أولوية قصوى
+    // =========================================================
+    async function initFingerprint() {
+        try {
+            // FingerprintJS v4 Open Source (CDN)
+            const fp     = await FingerprintJS.load();
+            const result = await fp.get();
+            deviceFingerprint = result.visitorId;
+            console.log("✅ FP ready:", deviceFingerprint.substring(0, 8) + "...");
+
+            // عرض آخر 6 أحرف من البصمة كشارة مرئية
+            if (els.fpBadge) {
+                els.fpBadge.innerText  = "🔐 " + deviceFingerprint.substring(0, 6).toUpperCase();
+                els.fpBadge.title      = "بصمة الجهاز (FingerprintJS)";
+                els.fpBadge.classList.remove('hidden');
+            }
+        } catch (err) {
+            console.warn("FingerprintJS error:", err);
+            // احتياط: بصمة بسيطة إذا فشلت المكتبة
+            deviceFingerprint = fallbackFingerprint();
+        }
+    }
+
+    // بصمة احتياطية (أضعف لكن أفضل من لا شيء)
+    function fallbackFingerprint() {
+        const raw = [
+            navigator.userAgent,
+            navigator.language,
+            screen.width + "x" + screen.height,
+            screen.colorDepth,
+            new Date().getTimezoneOffset(),
+            navigator.hardwareConcurrency || 0,
+            navigator.deviceMemory        || 0,
+        ].join("|");
+        // hash بسيط
+        let hash = 0;
+        for (let i = 0; i < raw.length; i++) {
+            hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash).toString(16).padStart(8, "0");
+    }
+
+    // ابدأ بتهيئة البصمة فوراً (لا تنتظر)
+    await initFingerprint();
+
+    // =========================================================
+    // 2. حالات الماسح
+    // =========================================================
     function showScannerIdle() {
         els.scannerIdle.classList.remove('hidden');
         els.scannerPermission.classList.add('hidden');
         els.scannerSection.classList.add('hidden');
     }
-
     function showScannerPermission() {
         els.scannerIdle.classList.add('hidden');
         els.scannerPermission.classList.remove('hidden');
         els.scannerSection.classList.add('hidden');
     }
-
     function showScannerActive() {
         els.scannerIdle.classList.add('hidden');
         els.scannerPermission.classList.add('hidden');
         els.scannerSection.classList.remove('hidden');
     }
 
-    // ===================================================
-    // التحقق من الجلسة المحفوظة
-    // ===================================================
-    const checkSavedSession = () => {
-        if (selectedEmployee && selectedBranch) {
-            // إخفاء بطاقة الفرع والموظف، إظهار الجلسة المحفوظة
+    // =========================================================
+    // 3. التحقق من الجلسة المحفوظة
+    // =========================================================
+    function checkSavedSession() {
+        if (selectedEmployee && selectedBranchAr) {
             els.branchCard.classList.add('hidden');
             els.employeeCard.classList.add('hidden');
             els.savedInfo.classList.remove('hidden');
-
             els.displayUser.innerText   = selectedEmployee;
-            els.displayBranch.innerText = selectedBranch === "Dawadimi" ? "الدوادمي" : "المزاحمية";
-
+            els.displayBranch.innerText = selectedBranchAr;
             employeeReady = true;
             startScanner();
         } else {
-            // الحالة الافتراضية: الماسح في وضع الانتظار
             showScannerIdle();
         }
-    };
+    }
 
-    // ===================================================
-    // اختيار الفرع
-    // ===================================================
+    // =========================================================
+    // 4. اختيار الفرع
+    // =========================================================
     document.querySelectorAll('input[name="branch"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-        selectedBranch = e.target.value;
+        radio.addEventListener('change', (e) => {
+            selectedBranchAr = BRANCH_DISPLAY[e.target.value] || e.target.value;
 
-        // بناء شبكة الموظفين
-        els.empGrid.innerHTML = "";
-        els.empGrid.classList.remove('employee-placeholder-grid');
-        els.empGrid.classList.add('active-grid');
+            els.empGrid.innerHTML = "";
+            els.empGrid.classList.remove('employee-placeholder-grid');
+            els.empGrid.classList.add('active-grid');
 
-        // ابحث عن هذا الجزء داخل document.querySelectorAll('input[name="branch"]')
-branchEmployees[selectedBranch].forEach(emp => {
-    const btn = document.createElement('button');
-    btn.type      = 'button';
-    btn.className = 'emp-btn';
-    
-    // هنا ندمج الاسم العربي والإنجليزي
-    // النتيجة ستكون مثلاً: رمان | Rumaan
-    const displayName = `${emp.ar} | ${emp.en}`;
-    
-    btn.innerHTML = `<i data-lucide="user"></i>${displayName}`;
-    
-    // عند الضغط، نرسل الاسم العربي (أو الإنجليزي حسب رغبتك في التخزين)
-    btn.onclick   = () => selectEmployee(emp.ar, btn); 
-    
-    els.empGrid.appendChild(btn);
-});
+            (branchEmployees[selectedBranchAr] || []).forEach(emp => {
+                const btn       = document.createElement('button');
+                btn.type        = 'button';
+                btn.className   = 'emp-btn';
+                btn.innerHTML   = `<i data-lucide="user"></i>${emp.ar} | ${emp.en}`;
+                btn.onclick     = () => selectEmployee(emp.ar, btn);
+                els.empGrid.appendChild(btn);
+            });
 
-        lucide.createIcons();
+            lucide.createIcons();
+            employeeReady    = false;
+            selectedEmployee = "";
 
-        // تصفير حالة الموظف
-        employeeReady = false;
-        selectedEmployee = "";
-
-        // التعديل هنا: إيقاف الماسح فقط إذا كان يعمل بالفعل لتجنب الخطأ
-        if (html5QrCode && html5QrCode.getState() > 1) {
-            html5QrCode.stop().catch(() => {});
-        }
-        
-        showScannerIdle();
+            if (html5QrCode && html5QrCode.getState() > 1) {
+                html5QrCode.stop().catch(() => {});
+            }
+            showScannerIdle();
+        });
     });
-});
 
-    // ===================================================
-    // اختيار الموظف
-    // ===================================================
-    function selectEmployee(name, btnElement) {
+    // =========================================================
+    // 5. اختيار الموظف
+    // =========================================================
+    function selectEmployee(name, btnEl) {
         selectedEmployee = name;
         document.querySelectorAll('.emp-btn').forEach(b => b.classList.remove('active'));
-        btnElement.classList.add('active');
+        btnEl.classList.add('active');
         employeeReady = true;
         startScanner();
     }
 
-    // ===================================================
-    // تشغيل الماسح
-    // ===================================================
+    // =========================================================
+    // 6. تشغيل الماسح
+    // =========================================================
     function startScanner() {
-    if (!employeeReady) {
-        showScannerIdle();
-        return;
+        if (!employeeReady) { showScannerIdle(); return; }
+        if (html5QrCode && html5QrCode.getState() > 1) {
+            html5QrCode.stop().then(initCamera).catch(() => initCamera());
+        } else {
+            initCamera();
+        }
     }
-
-    // التحقق مما إذا كان الكائن موجوداً والماسح في حالة تشغيل أو انتظار (حالة 2 أو 3)
-    if (html5QrCode && html5QrCode.getState() > 1) {
-        html5QrCode.stop()
-            .then(() => {
-                initCamera();
-            })
-            .catch(err => {
-                console.warn("فشل الإيقاف، سيتم البدء من جديد:", err);
-                initCamera();
-            });
-    } else {
-        initCamera();
-    }
-}
 
     function initCamera() {
-    // إذا كانت الكاميرا تعمل بالفعل، لا تفعل شيئاً
-    if (html5QrCode && html5QrCode.getState() === 2) return;
+        if (html5QrCode && html5QrCode.getState() === 2) return;
+        showScannerActive();
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
-    showScannerActive();
-    
-    if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+                if (html5QrCode.getState() > 1) html5QrCode.stop().catch(() => {});
+                sendAttendance(decodedText);
+            }
+        ).catch(() => showScannerPermission());
     }
 
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-            // التحقق من الحالة قبل الإيقاف عند النجاح
-            if (html5QrCode.getState() > 1) {
-                html5QrCode.stop().catch(() => {});
-            }
-            sendAttendance(decodedText);
-        }
-    ).catch(() => {
-        showScannerPermission();
-    });
-}
-
-    // زر إعادة المحاولة لإذن الكاميرا
     if (els.retryCamera) {
         els.retryCamera.onclick = () => {
-            if (employeeReady) {
-                initCamera();
-            } else {
-                showScannerIdle();
-            }
+            if (employeeReady) initCamera();
+            else showScannerIdle();
         };
     }
 
-    // ===================================================
-    // إرسال الحضور
-    // ===================================================
-    function sendAttendance(qrData) {
-        showModal('loading', 'جاري التحقق...', 'يتم تسجيل حضورك...');
+    // =========================================================
+    // 7. إرسال الحضور
+    // =========================================================
+    async function sendAttendance(qrData) {
+        showModal('loading', 'جاري التحقق...', 'يتم تسجيل حضورك والتحقق من هويتك...');
+
+        // تأكد من جاهزية البصمة
+        if (!deviceFingerprint) await initFingerprint();
+
+        let userIP = "Unknown";
+        try {
+            const res  = await fetch('https://api.ipify.org?format=json');
+            const json = await res.json();
+            userIP = json.ip;
+        } catch (_) {}
 
         const payload = {
             action:       'ATTENDANCE',
             employeeName: selectedEmployee,
-            branch:       selectedBranch,
+            branch:       selectedBranchAr,
             qrPayload:    qrData,
-            fingerprint:  getFingerprint()
+            ip:           userIP,
+            fingerprint:  deviceFingerprint,   // ✅ FingerprintJS visitorId
         };
 
         fetch(SCRIPT_URL, {
             method:  'POST',
             mode:    'no-cors',
             headers: { 'Content-Type': 'text/plain' },
-            body:    JSON.stringify(payload)
-        })
-        .then(() => {
+            body:    JSON.stringify(payload),
+        }).then(() => {
             localStorage.setItem('qb_staff_name',   selectedEmployee);
-            localStorage.setItem('qb_staff_branch', selectedBranch);
-            showModal('success', 'تم التسجيل', `شكراً ${selectedEmployee}، تم تسجيل حضورك بنجاح.`);
+            localStorage.setItem('qb_staff_branch', selectedBranchAr);
+            showModal('success', 'تم التسجيل ✓',
+                `شكراً ${selectedEmployee}، تم تسجيل حضورك بنجاح.`);
             setTimeout(() => location.reload(), 3000);
-        })
-        .catch(() => {
-            showModal('error', 'خطأ في الاتصال', 'فشل الإرسال، تحقق من الإنترنت.');
+        }).catch(() => {
+            showModal('error', 'خطأ في الاتصال',
+                'تعذر إرسال البيانات، يرجى المحاولة مرة أخرى.');
         });
     }
 
-    // ===================================================
-    // إعادة التعيين
-    // ===================================================
+    // =========================================================
+    // 8. إعادة التعيين
+    // =========================================================
     if (els.resetBtn) {
         els.resetBtn.onclick = () => {
             els.resetModal.classList.remove('hidden');
@@ -256,35 +282,33 @@ branchEmployees[selectedBranch].forEach(emp => {
         els.confirmReset.onclick = () => {
             const code = els.resetCodeInput.value.trim();
             if (!code) return;
-
-            els.resetModal.classList.add('hidden');
-            showModal('loading', 'جاري التحقق...', 'يتم التحقق من كود إعادة التعيين');
+            els.confirmReset.disabled = true;
 
             fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode:   'no-cors',
-                body:   JSON.stringify({ action: 'VERIFY_RESET', code })
+                method:  'POST',
+                mode:    'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body:    JSON.stringify({ action: 'VERIFY_RESET', code }),
             }).then(() => {
                 localStorage.removeItem('qb_staff_name');
                 localStorage.removeItem('qb_staff_branch');
-                showModal('success', 'تمت إعادة التعيين', 'سيتم تحديث الصفحة الآن...');
-                setTimeout(() => location.reload(), 2000);
+                location.reload();
             }).catch(() => {
-                showModal('error', 'خطأ', 'تعذر التحقق من الكود.');
+                els.confirmReset.disabled = false;
+                alert('تعذر الاتصال بالسيرفر.');
             });
         };
     }
 
-    // ===================================================
-    // Modal
-    // ===================================================
+    // =========================================================
+    // 9. Modal
+    // =========================================================
     function showModal(type, title, msg) {
         els.modal.classList.remove('hidden');
         els.modalTitle.innerText = title;
         els.modalMsg.innerText   = msg;
         els.modalLoader.classList.toggle('hidden', type !== 'loading');
         els.modalClose.classList.toggle('hidden', type === 'loading');
-
         if (type !== 'loading') {
             const icon = type === 'success' ? 'check-circle' : 'alert-circle';
             els.modalIcon.innerHTML = `<i data-lucide="${icon}" class="${type}-icon"></i>`;
@@ -296,14 +320,8 @@ branchEmployees[selectedBranch].forEach(emp => {
 
     els.modalClose.onclick = () => els.modal.classList.add('hidden');
 
-    // ===================================================
-    // Fingerprint
-    // ===================================================
-    const getFingerprint = () =>
-        btoa(`${navigator.userAgent}|${window.screen.width}x${window.screen.height}`);
-
-    // ===================================================
-    // التهيئة
-    // ===================================================
+    // =========================================================
+    // 10. التهيئة
+    // =========================================================
     checkSavedSession();
 });

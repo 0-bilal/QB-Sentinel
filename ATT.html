@@ -4,11 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>تسجيل الحضور والانصراف | ATT</title>
+        <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="ATT/ATT-style.css">
-    <link rel="stylesheet" href="css/style.css">
+
+
+    <!-- المكتبات الأساسية -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <!-- ✅ FingerprintJS v4 — بصمة الجهاز -->
+    <script>
+        !function(w,d,s,l,i){
+            w[l]=w[l]||[];
+            var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s);
+            j.async=true;
+            j.src='https://fpjscdn.net/v3/'+i+'/iife.min.js';
+            j.onload=function(){
+                // المكتبة المفتوحة المصدر (بدون API key)
+            };
+            f.parentNode.insertBefore(j,f)
+        }(window,document,'script','_fpjs','');
+    </script>
+    <!-- بديل مباشر للمكتبة المفتوحة المصدر -->
+    <script src="https://openfpcdn.io/fingerprintjs/v4/iife.min.js"></script>
+
     <link rel="icon" type="image/x-icon" href="ico/logo.ico">
+
+
 </head>
 <body>
 
@@ -41,7 +64,6 @@
 
 <div class="form-container">
 
-    <!-- Header -->
     <header class="main-header">
         <div class="header-overlay"></div>
         <div class="logo-area">
@@ -54,8 +76,8 @@
     </div>
 
             <img src="ico/logo.ico" alt="Logo" class="logo">
-            <h1>نظام الحضور والانصراف</h1>
-            <p class="en-sub-header">STAFF ATTENDANCE SYSTEM</p>
+            <h1>سند صرف نقدية</h1>
+            <p class="en-sub-header">CASH PAYMENT VOUCHER</p>
         </div>
     </header>
 

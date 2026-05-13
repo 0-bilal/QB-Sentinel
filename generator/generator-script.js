@@ -1,201 +1,249 @@
+/**
+ * QB-Sentinel — generator-script.js v2.0
+ * شاشة مولّد QR الخاصة بجهاز الفرع (iPad/Tablet)
+ */
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0ClQdqWFm9j7rA52Xzyv8x-E4Qer8D68fQ34Wpww28RuG-pgfwwmhhQIQg2diwg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGpMtn5R96F1e9qbGonE_neD8X3k7_9epv2Xiflu7Aq3EKqjUDGnmuh93tDyUTamFc/exec';
 
     let currentMode = 'IN';
-    let deviceId   = localStorage.getItem('QB_DEVICE_ID');
-    let branchName = localStorage.getItem('QB_BRANCH_NAME');
-    let qrTimer    = null;
-    let qrInstance = null;
+    let deviceId    = localStorage.getItem('QB_DEVICE_ID');
+    let branchName  = localStorage.getItem('QB_BRANCH_NAME');
+    let qrTimer     = null;
+    let qrInstance  = null;
 
     const els = {
-        setupScreen:  document.getElementById('setupScreen'),
-        deviceInput:  document.getElementById('deviceIdInput'),
-        saveSetupBtn: document.getElementById('saveSetupBtn'),
-        deviceDisplay:document.getElementById('deviceDisplay'),
-        timestamp:    document.getElementById('timestamp'),
-        selectionView:document.getElementById('selectionView'),
-        qrView:       document.getElementById('qrView'),
-        qrContainer:  document.getElementById('qrContainer'),
-        qrModeBadge:  document.getElementById('qrModeBadge'),
-        qrModeIcon:   document.getElementById('qrModeIcon'),
-        qrModeLabel:  document.getElementById('qrModeLabel'),
-        qrModeSub:    document.getElementById('qrModeSub'),
-        timerFill:    document.getElementById('timerFill'),
-        qrCard:       document.getElementById('qrView')?.querySelector('.qr-card'),
+        setupScreen:   document.getElementById('setupScreen'),
+        deviceInput:   document.getElementById('deviceIdInput'),
+        saveSetupBtn:  document.getElementById('saveSetupBtn'),
+        setupStatus:   document.getElementById('setupStatus'),
+        deviceDisplay: document.getElementById('deviceDisplay'),
+        timestamp:     document.getElementById('timestamp'),
+        selectionView: document.getElementById('selectionView'),
+        qrView:        document.getElementById('qrView'),
+        qrContainer:   document.getElementById('qrContainer'),
+        qrModeBadge:   document.getElementById('qrModeBadge'),
+        qrModeIcon:    document.getElementById('qrModeIcon'),
+        qrModeLabel:   document.getElementById('qrModeLabel'),
+        qrModeSub:     document.getElementById('qrModeSub'),
+        timerFill:     document.getElementById('timerFill'),
     };
 
-    // --- التحقق من الجلسة ---
+    // =========================================================
+    // التحقق من الجلسة
+    // =========================================================
     if (!deviceId || !branchName) {
         els.setupScreen.classList.remove('hidden');
     } else {
         initMainSystem();
     }
 
-    // --- حفظ إعداد الجهاز ---
-    els.saveSetupBtn.onclick = () => {
+    // =========================================================
+    // حفظ إعداد الجهاز
+    // الخطوة 1: POST (no-cors) → تسجيل في الشيت
+    // الخطوة 2: JSONP (doGet)  → جلب اسم الفرع العربي
+    // =========================================================
+    els.saveSetupBtn.onclick = async () => {
         const input = els.deviceInput.value.trim();
         if (!input) return;
 
         els.saveSetupBtn.disabled = true;
-        els.saveSetupBtn.innerHTML = '<i data-lucide="loader"></i> جاري التحقق...';
-        lucide.createIcons();
+        setStatus('loading', 'جاري التحقق من الجهاز...');
 
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action:    'REGISTER_DEVICE',
-                deviceId:  input,
-                userAgent: navigator.userAgent,
-                screenRes: `${window.screen.width}x${window.screen.height}`
-            })
-        })
-        .then(res => res.text())
-        .then(response => {
-            if (response.startsWith("SUCCESS|")) {
-                const name = response.split("|")[1];
-                localStorage.setItem('QB_DEVICE_ID',   input);
-                localStorage.setItem('QB_BRANCH_NAME', name);
-                location.reload();
-            } else {
-                alert("كود الفرع غير صحيح أو غير مسجل.");
-                els.saveSetupBtn.disabled = false;
-                els.saveSetupBtn.innerHTML = '<i data-lucide="save"></i> حفظ وإعداد الجهاز';
-                lucide.createIcons();
-            }
-        })
-        .catch(() => {
+        try {
+            const device = await getDeviceInfo();
+
+            // الخطوة 1: تسجيل الجهاز في الشيت
+            await fetch(SCRIPT_URL, {
+                method:  'POST',
+                mode:    'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action:    'REGISTER_DEVICE',
+                    deviceId:  input,
+                    ip:        device.ip,
+                    location:  device.loc,
+                    userAgent: navigator.userAgent,
+                    screenRes: `${screen.width}x${screen.height}`,
+                }),
+            });
+
+            // الخطوة 2: جلب اسم الفرع عبر JSONP
+            const branchAr = await fetchBranchViaJsonp(SCRIPT_URL, input);
+
+            // حفظ البيانات
+            localStorage.setItem('QB_DEVICE_ID',   input);
+            localStorage.setItem('QB_BRANCH_NAME', branchAr);
+
+            setStatus('success', `✅ تم التسجيل — ${branchAr}`);
+
+            setTimeout(() => {
+                deviceId   = input;
+                branchName = branchAr;
+                els.setupScreen.classList.add('hidden');
+                initMainSystem();
+            }, 1200);
+
+        } catch (err) {
+            console.error(err);
+            setStatus('error', '⚠️ تعذر الاتصال. تحقق من الاتصال وأعد المحاولة.');
             els.saveSetupBtn.disabled = false;
-            els.saveSetupBtn.innerHTML = '<i data-lucide="save"></i> حفظ وإعداد الجهاز';
-            lucide.createIcons();
-        });
+        }
     };
 
-    // --- تشغيل النظام الرئيسي ---
+    // =========================================================
+    // جلب اسم الفرع عبر JSONP
+    // =========================================================
+    function fetchBranchViaJsonp(url, dId) {
+        return new Promise((resolve) => {
+            const cbName = 'QB_CB_' + Date.now();
+            let script;
+
+            const timer = setTimeout(() => {
+                cleanup();
+                resolve(localBranchName(dId));
+            }, 8000);
+
+            window[cbName] = (data) => {
+                clearTimeout(timer);
+                cleanup();
+                resolve(data?.branchAr || localBranchName(dId));
+            };
+
+            function cleanup() {
+                delete window[cbName];
+                script?.remove();
+            }
+
+            script     = document.createElement('script');
+            script.src = `${url}?action=GET_BRANCH_NAME&deviceId=${encodeURIComponent(dId)}&callback=${cbName}`;
+            script.onerror = () => { clearTimeout(timer); cleanup(); resolve(localBranchName(dId)); };
+            document.head.appendChild(script);
+        });
+    }
+
+    // قاموس احتياطي محلي
+    function localBranchName(id) {
+        const m = {
+            Muzahmiyah: 'المزاحمية', muzahmiyah: 'المزاحمية',
+            Dawadimi:   'الدوادمي',  dawadimi:   'الدوادمي',
+        };
+        return m[id] || id;
+    }
+
+    function setStatus(type, msg) {
+        if (!els.setupStatus) return;
+        els.setupStatus.className   = 'setup-status ' + type;
+        els.setupStatus.innerText   = msg;
+        els.setupStatus.classList.remove('hidden');
+    }
+
+    // =========================================================
+    // تشغيل النظام الرئيسي
+    // =========================================================
     function initMainSystem() {
         els.deviceDisplay.innerText = `فرع: ${branchName}`;
-        setInterval(updateTime, 1000);
         updateTime();
+        setInterval(updateTime, 1000);
     }
 
-    // --- الساعة ---
     function updateTime() {
-        const now = new Date();
-        els.timestamp.innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+        els.timestamp.innerText = new Date().toLocaleTimeString('en-EN', { hour12: false });
     }
 
-    // --- تفعيل الوضع (حضور / انصراف) مع انتقال سلس ---
+    // =========================================================
+    // تفعيل الوضع (حضور / انصراف)
+    // =========================================================
     window.activateMode = function(mode) {
         currentMode = mode;
+        const isIn  = mode === 'IN';
 
-        const selView = els.selectionView;
-        const qrView  = els.qrView;
-        const qrCard  = qrView.querySelector('.qr-card');
-        const scanLine = qrView.querySelector('.qr-scan-line');
-        const timerFill = els.timerFill;
-
-        // تحديث واجهة QR View حسب الوضع
-        const isIn = (mode === 'IN');
-
-        // Badge
         els.qrModeBadge.className = 'qr-mode-badge ' + (isIn ? 'in-mode' : 'out-mode');
         els.qrModeIcon.setAttribute('data-lucide', isIn ? 'log-in' : 'log-out');
-        els.qrModeLabel.innerText = isIn ? 'تسجيل حضور' : 'تسجيل انصراف';
-        els.qrModeSub.innerText   = isIn ? 'Check-In'    : 'Check-Out';
+        els.qrModeLabel.innerText = isIn ? 'تسجيل حضور'  : 'تسجيل انصراف';
+        els.qrModeSub.innerText   = isIn ? 'Check-In'     : 'Check-Out';
 
-        // QR Card اللون
-        if (qrCard) {
-            qrCard.className = 'qr-card ' + (isIn ? 'in-mode' : 'out-mode');
-        }
-
-        // Timer color
-        if (timerFill) {
-            timerFill.classList.toggle('in-mode', isIn);
-        }
+        const qrCard = els.qrView.querySelector('.qr-card');
+        if (qrCard) qrCard.className = 'qr-card ' + (isIn ? 'in-mode' : 'out-mode');
+        if (els.timerFill) els.timerFill.classList.toggle('in-mode', isIn);
 
         lucide.createIcons();
 
-        // انتقال: إخفاء البطاقتين
-        selView.style.animation = 'fadeSlideDown 0.3s ease forwards';
-
+        els.selectionView.style.animation = 'fadeSlideDown 0.3s ease forwards';
         setTimeout(() => {
-            selView.classList.add('hidden');
-            selView.style.animation = '';
-
-            // إنشاء QR
+            els.selectionView.classList.add('hidden');
+            els.selectionView.style.animation = '';
             generateQR();
-
-            // إظهار QR View
-            qrView.classList.remove('hidden');
-            qrView.style.animation = 'scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both';
-
+            els.qrView.classList.remove('hidden');
+            els.qrView.style.animation = 'scaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
         }, 280);
     };
 
-    // --- العودة للاختيار ---
+    // =========================================================
+    // العودة لشاشة الاختيار
+    // =========================================================
     window.goBack = function() {
-        const qrView  = els.qrView;
-        const selView = els.selectionView;
-
-        // إيقاف مؤقت QR
         clearInterval(qrTimer);
         qrTimer = null;
 
-        // انتقال: إخفاء QR View
-        qrView.style.animation = 'slideOut 0.3s ease forwards';
-
+        els.qrView.style.animation = 'slideOut 0.3s ease forwards';
         setTimeout(() => {
-            qrView.classList.add('hidden');
-            qrView.style.animation = '';
-
-            // إظهار البطاقتين
-            selView.classList.remove('hidden');
-            selView.style.animation = 'slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both';
-
+            els.qrView.classList.add('hidden');
+            els.qrView.style.animation = '';
+            els.selectionView.classList.remove('hidden');
+            els.selectionView.style.animation = 'slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
         }, 280);
     };
 
-    // --- توليد QR ---
+    // =========================================================
+    // توليد QR
+    // =========================================================
     function generateQR() {
-        const container = els.qrContainer;
-        container.innerHTML = '';
-
-        qrInstance = new QRCode(container, {
-            width:        256,
-            height:       256,
-            correctLevel: QRCode.CorrectLevel.H
+        els.qrContainer.innerHTML = '';
+        qrInstance = new QRCode(els.qrContainer, {
+            width: 256, height: 256,
+            correctLevel: QRCode.CorrectLevel.H,
         });
-
         updateQR();
-
-        // تحديث كل 30 ثانية
         clearInterval(qrTimer);
         qrTimer = setInterval(updateQR, 30000);
     }
 
     function updateQR() {
         if (!qrInstance) return;
-
-        const timestamp   = Date.now();
-        const rawData     = `${deviceId}|${currentMode}|${timestamp}`;
-        const encodedData = btoa(rawData);
-
+        const raw     = `${deviceId}|${currentMode}|${Date.now()}`;
+        const encoded = btoa(raw);
         qrInstance.clear();
-        qrInstance.makeCode(encodedData);
+        qrInstance.makeCode(encoded);
+        animateTimer();
+    }
 
-        // إعادة تشغيل شريط التقدم
+    function animateTimer() {
         const fill = els.timerFill;
-        if (fill) {
-            fill.style.transition = 'none';
-            fill.style.width      = '100%';
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    fill.style.transition = 'width 30s linear';
-                    fill.style.width      = '0%';
-                });
-            });
-        }
+        if (!fill) return;
+        fill.style.transition = 'none';
+        fill.style.width      = '100%';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            fill.style.transition = 'width 30s linear';
+            fill.style.width      = '0%';
+        }));
+    }
+
+    // =========================================================
+    // جلب معلومات الجهاز
+    // =========================================================
+    async function getDeviceInfo() {
+        const info = { ip: "0.0.0.0", loc: "Denied" };
+        try {
+            info.ip = (await (await fetch('https://api.ipify.org?format=json')).json()).ip;
+        } catch (_) {}
+        try {
+            const pos = await new Promise((res, rej) =>
+                navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
+            info.loc = `${pos.coords.latitude},${pos.coords.longitude}`;
+        } catch (_) {}
+        return info;
     }
 
 });

@@ -9,6 +9,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/x-icon" href="ico/logo.ico">
+
+
+
+<link rel="icon" type="image/png" sizes="192x192" href="ico/logo.png">
+<link rel="apple-touch-icon" href="ico/logo.png">
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="QB-Sentinel">
+<meta name="theme-color" content="#c62828">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('تم تفعيل نظام التطبيق بنجاح'))
+        .catch(err => console.error('فشل تفعيل الـ Service Worker:', err));
+    });
+  }
+</script>
+
 </head>
 <body>
 
@@ -37,14 +60,18 @@
                 <img src="ico/logo.ico" alt="Logo" class="top-logo">
                 <div class="brand-text">
                     <span class="brand-name">QB-Sentinel</span>
-                    <span id="deviceDisplay" class="branch-label">فرع: —</span>
+                    
                 </div>
             </div>
             <div class="top-bar-meta">
                 <div class="time-display" id="timestamp">--:--:--</div>
                 <div id="connectionStatus" class="status-badge">
+                    <span id="deviceDisplay" class="branch-label">فرع: —</span>
                     <span class="dot"></span>
                     <span>متصل</span>
+
+                 
+                    
                 </div>
             </div>
         </header>
@@ -133,12 +160,13 @@
         <!-- تذييل -->
         <footer class="bottom-bar">
             <span class="footer-brand">برمجيات QB • بلال الخواجة</span>
-            <span class="version-number footer-version">v1.6.101</span>
+            <span class="version-number footer-version">v1.7.101</span>
         </footer>
 
     </div>
 
 <script src="generator/generator-script.js"></script>
+
 <script>lucide.createIcons();</script>
 </body>
 </html>

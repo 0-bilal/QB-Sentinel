@@ -168,7 +168,7 @@ html, body {
 }
 
 .branch-label {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-light);
 }
 
@@ -511,7 +511,7 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0 14px;
+    padding: 10px 0 25px;
     border-top: 1px solid var(--border);
     flex-shrink: 0;
 }
