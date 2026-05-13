@@ -6,6 +6,7 @@ const APP_VERSIONS = {
     "EDR": "BETA",
     "PRR": "BETA",
     "PAL": "BETA",
+    "REM": "v1.1.2",
     "GLOBAL": "v1.14.2" 
     //  2026/05/10 date
 };
@@ -24,6 +25,7 @@ function updateDisplayedVersions() {
         else if (path.includes('EDR')) versionElement.innerText = APP_VERSIONS.EDR;
         else if (path.includes('PRR')) versionElement.innerText = APP_VERSIONS.PRR;
         else if (path.includes('PAL')) versionElement.innerText = APP_VERSIONS.PAL;
+        else if (path.includes('REM')) versionElement.innerText = APP_VERSIONS.REM;
         else versionElement.innerText = APP_VERSIONS.GLOBAL;
     }
 
@@ -39,6 +41,7 @@ function updateDisplayedVersions() {
             if (href.includes('EDR')) tag.innerText = APP_VERSIONS.EDR;
             if (href.includes('ATT')) tag.innerText = APP_VERSIONS.ATT;
             if (href.includes('PRR')) tag.innerText = APP_VERSIONS.PRR;
+            if (href.includes('REM')) tag.innerText = APP_VERSIONS.REM;
             if (href.includes('CPV')) tag.innerText = APP_VERSIONS.CPV;
             if (href.includes('PAL')) tag.innerText = APP_VERSIONS.PAL;
         }
