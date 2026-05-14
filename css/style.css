@@ -357,6 +357,15 @@ body {
     color: var(--primary-dark);
 }
 
+.report-tag-BETA {
+    font-size: 10px;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: var(--primary-dark);
+}
+
 .report-card-arrow {
     color: var(--border);
     transition: 0.3s;
@@ -407,4 +416,108 @@ body {
 .refresh-btn i {
     width: 18px;
     height: 18px;
+}
+
+/* حاوية الأوسمة داخل البطاقة */
+.tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+/* وسم البيتا (تجريبي) */
+.tag-beta {
+    font-size: 9px;
+    background: var(--accent);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+    border: 1px solid var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.tag-beta::before {
+    content: ""; width: 5px; height: 5px; background: var(--primary);
+    border-radius: 50%; animation: pulse 1.5s infinite;
+}
+
+/* وسم قيد التطوير */
+.tag-dev {
+    font-size: 9px;
+    background: #f8fafc;
+    color: #64748b;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+    border: 1px solid #cbd5e1;
+    display: inline-flex;
+    align-items: center; gap: 4px;
+}
+.tag-dev::before { content: "⚙"; font-size: 10px; animation: rotate 2s linear infinite; }
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* حاوية الوسوم لترتيب الأزرار بجانب بعضها */
+.tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+    align-items: center;
+}
+
+/* وسم البيتا الأحمر الصغير */
+.tag-beta {
+    font-size: 9px;
+    background: var(--accent); /* الخلفية الباهتة للهوية */
+    color: var(--primary);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 800;
+    border: 1px solid var(--primary);
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+}
+
+/* النقطة النابضة بجانب كلمة BETA */
+.tag-beta::before {
+    content: "";
+    width: 4px;
+    height: 4px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    margin-left: 4px; /* للمحاذاة العربية */
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* وسم تقرير جديد - NEW TAG */
+.tag-new {
+    font-size: 9px;
+    background: #f0fdf4; /* خلفية خضراء باهتة */
+    color: #16a34a; /* نص أخضر */
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+    border: 1px solid #bbf7d0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+}
+
+/* أيقونة النجمة الصغيرة بجانب كلمة NEW */
+.tag-new::before {
+    content: "★";
+    font-size: 10px;
 }
