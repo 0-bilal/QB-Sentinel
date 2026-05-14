@@ -78,14 +78,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 18px;
+    padding: 14px 12px; /* تقليل البادينج */
     background: transparent;
     border: none;
     cursor: pointer;
     text-align: right;
     border-bottom: 1px solid var(--border);
     transition: background 0.2s ease;
-    gap: 10px;
+    gap: 6px; /* تقليل الـ gap */
+    min-width: 0; /* مهم جداً لمنع overflow */
 }
 
 .section-header:hover {
@@ -95,19 +96,21 @@ body {
 .section-header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     flex: 1;
+    min-width: 0; /* يمنع الـ overflow */
+    overflow: hidden;
 }
 
 /* أيقونة القسم */
 .section-icon-wrap {
-    width: 40px;
-    height: 40px;
+    width: 36px;  /* تصغير قليل */
+    height: 36px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    flex-shrink: 0; /* مهم: يمنع تصغير الأيقونة */
 }
 
 .section-icon-wrap i {
@@ -121,27 +124,34 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .section-title-ar {
-    font-size: 15px;
+    font-size: 14px; /* تصغير طفيف للهاتف */
     font-weight: 700;
     color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 .section-title-en {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text-light);
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 /* الجانب الأيسر: العداد + السهم */
 .section-meta {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
+    gap: 6px;
+    flex-shrink: 0; /* مهم: لا يتقلص */
 }
 
 .section-count {
