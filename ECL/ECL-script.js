@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqxwJ5CBwjPSX-8CZSLVOSz5k7eOyd95mPOHGXXWo_Q_Gb7PgJUVizv_vTqIVqJ7CcIA/exec';
 
@@ -203,4 +202,69 @@ document.addEventListener('DOMContentLoaded', () => {
             els.submitBtn.style.opacity = '1';
         }
     });
+});
+
+
+// ===================================================
+//  Accordion Equipment Groups
+// ===================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+
+    accordionHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const targetId = header.getAttribute('data-target');
+            const body = document.getElementById(targetId);
+            const group = header.closest('.accordion-group');
+            const isOpen = group.classList.contains('is-open');
+
+            // أغلق الكل
+            document.querySelectorAll('.accordion-group.is-open').forEach(g => {
+                g.classList.remove('is-open');
+                g.querySelector('.accordion-body').style.maxHeight = '0';
+            });
+
+            // افتح المضغوط إذا كان مغلقاً
+            if (!isOpen) {
+                group.classList.add('is-open');
+                body.style.maxHeight = body.scrollHeight + 'px';
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    });
+
+    // تحديث البانر عند اختيار جهاز
+    document.querySelectorAll('input[name="equipment"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const banner = document.getElementById('selectedEquipmentBanner');
+            const arSpan = document.getElementById('selectedEqAr');
+            const enSpan = document.getElementById('selectedEqEn');
+            const idSpan = document.getElementById('selectedEqId');
+
+            if (radio.checked) {
+                const tile = radio.closest('.check-tile');
+                const ar = tile.querySelector('span').innerText;
+                const en = tile.querySelector('small').innerText;
+                const eqId = radio.getAttribute('data-id');
+
+                arSpan.innerText = ar;
+                enSpan.innerText = en;
+                idSpan.innerText = eqId;
+                banner.classList.remove('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        });
+    });
+
+    // افتح القسم الأول افتراضياً
+    const firstGroup = document.querySelector('.accordion-group');
+    if (firstGroup) {
+        firstGroup.classList.add('is-open');
+        const firstBody = firstGroup.querySelector('.accordion-body');
+        // نستخدم setTimeout لنضمن أن الـ DOM جاهز
+        setTimeout(() => {
+            firstBody.style.maxHeight = firstBody.scrollHeight + 'px';
+        }, 100);
+    }
 });
