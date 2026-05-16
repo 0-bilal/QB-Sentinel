@@ -1,6 +1,6 @@
 const FILNotifications = (() => {
 
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCe_N03PxSnJh5e4wrTA-kN9yKw3VXmnamMgjAQJqQLGZX2LAH7AaBXoFVwevd1v3KAw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNsR7s7fmTsyEUarjdpoYSbO52M0cfniWjIh65EwuyUexaI15WM4yezdZ4ZgBaEYVIsg/exec';
 
     let notifications = [];
     let panelOpen     = false;
