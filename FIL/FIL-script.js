@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA0aXKmxBTze3nF_q0ZprBQNaGHgSN1AWZ4ZnM3J5e14DCEEOPHWbN2mk1BlAKfx3jUQ/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNsR7s7fmTsyEUarjdpoYSbO52M0cfniWjIh65EwuyUexaI15WM4yezdZ4ZgBaEYVIsg/exec';
 
     const employeeDatabase = {
         "1000": "بلال الخواجة",
@@ -342,6 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.result === 'success') {
                 showModal('success', 'تم الإرسال', `تم إرسال تقرير فحص الفاكهة بنجاح برقم: ${result.id}`);
                 resetFullForm();
+                // تحديث الإشعارات بعد الإرسال الناجح
+                if (typeof FILNotifications !== 'undefined') {
+                    FILNotifications.refresh();
+                }
             } else {
                 throw new Error(result.message || 'فشل السيرفر في معالجة الطلب');
             }
