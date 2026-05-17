@@ -439,18 +439,6 @@ document.getElementById('mfgForm').addEventListener('submit', function (e) {
     });
 });
 
-/* =============================================
-   HEADER BUTTONS
-   ============================================= */
-
-if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => location.reload());
-}
-
-/* =============================================
-   INIT
-   ============================================= */
-
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     bindIngredientInputs();
