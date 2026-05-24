@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="ico/logo.png" alt="QB-Sentinel Logo" width="80"/>
+<img src="ico/QB-Sentinel-Logo.png" alt="QB-Sentinel Logo" width="80"/>
 
 # QB-Sentinel
 
