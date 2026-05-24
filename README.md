@@ -242,15 +242,13 @@ branchEmployees: {
 
 ## 📄 الترخيص / License
 
-هذا المشروع مرخص تحت رخصة **MIT** — يمكنك استخدامه وتعديله ونشره بحرية مع الإشارة للمصدر الأصلي.
-
-This project is licensed under the **MIT License** — free to use, modify, and distribute with attribution.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
 <div align="center">
 
-**صُنع بـ ❤️ من قِبَل [بلال الخواجة](https://github.com/your-username) — برمجيات QB**
+**صُنع من قِبَل [بلال الخواجة](https://github.com/your-username) — برمجيات QB**
 
 *Crafted by Bilal Al-Khawaja — QB Software*
 
