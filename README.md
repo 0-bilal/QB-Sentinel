@@ -169,7 +169,7 @@ showModal('error',   'عنوان', 'رسالة');  // خطأ
 
 ```bash
 # مثال: GitHub Pages
-git clone https://github.com/your-username/QB-Sentinel
+git clone 0-bilal.github.io/QB-Sentinel
 cd QB-Sentinel
 # ارفع المشروع وفعّل GitHub Pages من الإعدادات
 ```
@@ -242,13 +242,14 @@ branchEmployees: {
 
 ## 📄 الترخيص / License
 
-This project is licensed under the [MIT License](LICENSE).
+هذا المشروع مرخص تحت رخصة **MIT** — يمكنك استخدامه وتعديله ونشره بحرية مع الإشارة للمصدر الأصلي.
 
+This project is licensed under the [MIT License](LICENSE) — free to use, modify, and distribute with attribution.
 ---
 
 <div align="center">
 
-**صُنع من قِبَل [بلال الخواجة](https://github.com/your-username) — برمجيات QB**
+**صُنع من قِبَل [بلال الخواجة](https://github.com/0-bilal) — برمجيات QB**
 
 *Crafted by Bilal Al-Khawaja — QB Software*
 
